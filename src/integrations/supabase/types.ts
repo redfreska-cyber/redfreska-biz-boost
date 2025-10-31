@@ -1,0 +1,505 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
+  public: {
+    Tables: {
+      clientes: {
+        Row: {
+          codigo_referido: string | null
+          correo: string | null
+          estado: string | null
+          fecha_registro: string
+          id: string
+          nombre: string
+          restaurante_id: string
+          telefono: string | null
+        }
+        Insert: {
+          codigo_referido?: string | null
+          correo?: string | null
+          estado?: string | null
+          fecha_registro?: string
+          id?: string
+          nombre: string
+          restaurante_id: string
+          telefono?: string | null
+        }
+        Update: {
+          codigo_referido?: string | null
+          correo?: string | null
+          estado?: string | null
+          fecha_registro?: string
+          id?: string
+          nombre?: string
+          restaurante_id?: string
+          telefono?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clientes_restaurante_id_fkey"
+            columns: ["restaurante_id"]
+            isOneToOne: false
+            referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversiones: {
+        Row: {
+          cliente_id: string
+          codigo_referente: string | null
+          estado: string | null
+          fecha_conversion: string
+          id: string
+          referido_id: string | null
+          registrar_consumo: boolean | null
+          restaurante_id: string
+        }
+        Insert: {
+          cliente_id: string
+          codigo_referente?: string | null
+          estado?: string | null
+          fecha_conversion?: string
+          id?: string
+          referido_id?: string | null
+          registrar_consumo?: boolean | null
+          restaurante_id: string
+        }
+        Update: {
+          cliente_id?: string
+          codigo_referente?: string | null
+          estado?: string | null
+          fecha_conversion?: string
+          id?: string
+          referido_id?: string | null
+          registrar_consumo?: boolean | null
+          restaurante_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversiones_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversiones_referido_id_fkey"
+            columns: ["referido_id"]
+            isOneToOne: false
+            referencedRelation: "referidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversiones_restaurante_id_fkey"
+            columns: ["restaurante_id"]
+            isOneToOne: false
+            referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      premios: {
+        Row: {
+          created_at: string
+          descripcion: string
+          detalle_premio: string | null
+          id: string
+          is_active: boolean
+          orden: number
+          restaurante_id: string
+          tipo_premio: string
+          umbral: number
+        }
+        Insert: {
+          created_at?: string
+          descripcion: string
+          detalle_premio?: string | null
+          id?: string
+          is_active?: boolean
+          orden?: number
+          restaurante_id: string
+          tipo_premio: string
+          umbral: number
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string
+          detalle_premio?: string | null
+          id?: string
+          is_active?: boolean
+          orden?: number
+          restaurante_id?: string
+          tipo_premio?: string
+          umbral?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "premios_restaurante_id_fkey"
+            columns: ["restaurante_id"]
+            isOneToOne: false
+            referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referidos: {
+        Row: {
+          cliente_owner_id: string
+          cliente_referido_id: string | null
+          codigo_referido: string
+          consumo_realizado: boolean | null
+          created_at: string
+          fecha_registro: string | null
+          id: string
+          restaurante_id: string
+        }
+        Insert: {
+          cliente_owner_id: string
+          cliente_referido_id?: string | null
+          codigo_referido: string
+          consumo_realizado?: boolean | null
+          created_at?: string
+          fecha_registro?: string | null
+          id?: string
+          restaurante_id: string
+        }
+        Update: {
+          cliente_owner_id?: string
+          cliente_referido_id?: string | null
+          codigo_referido?: string
+          consumo_realizado?: boolean | null
+          created_at?: string
+          fecha_registro?: string | null
+          id?: string
+          restaurante_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referidos_cliente_owner_id_fkey"
+            columns: ["cliente_owner_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referidos_cliente_referido_id_fkey"
+            columns: ["cliente_referido_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referidos_restaurante_id_fkey"
+            columns: ["restaurante_id"]
+            isOneToOne: false
+            referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurantes: {
+        Row: {
+          contrasena_hash: string | null
+          correo: string | null
+          correo_contacto: string | null
+          created_at: string
+          direccion: string | null
+          estado_suscripcion: string | null
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          id: string
+          nombre: string
+          plan_actual: string | null
+          ruc: string | null
+          telefono: string | null
+        }
+        Insert: {
+          contrasena_hash?: string | null
+          correo?: string | null
+          correo_contacto?: string | null
+          created_at?: string
+          direccion?: string | null
+          estado_suscripcion?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          nombre: string
+          plan_actual?: string | null
+          ruc?: string | null
+          telefono?: string | null
+        }
+        Update: {
+          contrasena_hash?: string | null
+          correo?: string | null
+          correo_contacto?: string | null
+          created_at?: string
+          direccion?: string | null
+          estado_suscripcion?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          nombre?: string
+          plan_actual?: string | null
+          ruc?: string | null
+          telefono?: string | null
+        }
+        Relationships: []
+      }
+      suscripciones: {
+        Row: {
+          created_at: string
+          estado: string | null
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          id: string
+          monto_pagado: number | null
+          restaurante_id: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          monto_pagado?: number | null
+          restaurante_id: string
+        }
+        Update: {
+          created_at?: string
+          estado?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          monto_pagado?: number | null
+          restaurante_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suscripciones_restaurante_id_fkey"
+            columns: ["restaurante_id"]
+            isOneToOne: false
+            referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios: {
+        Row: {
+          correo: string | null
+          created_at: string
+          estado: string | null
+          id: string
+          nombre: string
+          restaurante_id: string
+          telefono: string | null
+        }
+        Insert: {
+          correo?: string | null
+          created_at?: string
+          estado?: string | null
+          id?: string
+          nombre: string
+          restaurante_id: string
+          telefono?: string | null
+        }
+        Update: {
+          correo?: string | null
+          created_at?: string
+          estado?: string | null
+          id?: string
+          nombre?: string
+          restaurante_id?: string
+          telefono?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_restaurante_id_fkey"
+            columns: ["restaurante_id"]
+            isOneToOne: false
+            referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      validaciones: {
+        Row: {
+          cliente_id: string
+          fecha_validacion: string
+          id: string
+          motivo: string | null
+          validado: boolean | null
+        }
+        Insert: {
+          cliente_id: string
+          fecha_validacion?: string
+          id?: string
+          motivo?: string | null
+          validado?: boolean | null
+        }
+        Update: {
+          cliente_id?: string
+          fecha_validacion?: string
+          id?: string
+          motivo?: string | null
+          validado?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validaciones_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
