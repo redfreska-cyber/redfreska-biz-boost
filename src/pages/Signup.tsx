@@ -85,11 +85,7 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
       <div className="w-full max-w-md space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/access")}
-          className="mb-4"
-        >
+        <Button variant="ghost" onClick={() => navigate("/access")} className="mb-4">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Volver
         </Button>
@@ -120,13 +116,7 @@ const Signup = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="ruc">RUC</Label>
-                <Input
-                  id="ruc"
-                  name="ruc"
-                  value={formData.ruc}
-                  onChange={handleChange}
-                  placeholder="20123456789"
-                />
+                <Input id="ruc" name="ruc" value={formData.ruc} onChange={handleChange} placeholder="20123456789" />
               </div>
 
               <div className="space-y-2">
