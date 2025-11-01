@@ -41,35 +41,43 @@ const Signup = () => {
       });
 
       if (authError) throw authError;
+      if (!authData.user) throw new Error("Error al crear usuario");
 
-      // 2. Register restaurant in backend
-      const response = await fetch("https://redfreska-cerebro.vercel.app/api/registrarRestaurante", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // 2. Create restaurant in Supabase
+      const { data: restauranteData, error: restauranteError } = await supabase
+        .from("restaurantes")
+        .insert({
           nombre: formData.nombre,
           ruc: formData.ruc,
           correo: formData.correo,
           telefono: formData.telefono,
           direccion: formData.direccion,
-          contrasena: formData.password,
-        }),
-      });
+        })
+        .select()
+        .single();
 
-      const data = await response.json();
+      if (restauranteError) throw restauranteError;
+      if (!restauranteData) throw new Error("Error al crear restaurante");
 
-      if (!response.ok) {
-        throw new Error(data.error || "Error al registrar restaurante");
-      }
+      // 3. Create user role (admin)
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({
+          user_id: authData.user.id,
+          restaurante_id: restauranteData.id,
+          role: "admin",
+        });
 
-      // 3. Set restaurant context
+      if (roleError) throw roleError;
+
+      // 4. Set restaurant context
       setRestaurante({
-        id: data.restaurante.id,
-        nombre: data.restaurante.nombre,
-        correo: data.restaurante.correo,
-        ruc: data.restaurante.ruc,
-        telefono: data.restaurante.telefono,
-        direccion: data.restaurante.direccion,
+        id: restauranteData.id,
+        nombre: restauranteData.nombre,
+        correo: restauranteData.correo,
+        ruc: restauranteData.ruc,
+        telefono: restauranteData.telefono,
+        direccion: restauranteData.direccion,
       });
 
       toast.success("¡Cuenta creada exitosamente!");

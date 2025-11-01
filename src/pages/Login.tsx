@@ -34,38 +34,42 @@ const Login = () => {
       });
 
       if (authError) throw authError;
+      if (!authData.user) throw new Error("Error al iniciar sesión");
 
-      // 2. Backend login to get restaurant data
-      const response = await fetch("https://redfreska-cerebro.vercel.app/api/loginRestaurante", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          correo: formData.correo,
-          contrasena: formData.password,
-        }),
-      });
+      // 2. Get user's restaurante_id from user_roles
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("restaurante_id, role")
+        .eq("user_id", authData.user.id)
+        .single();
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Correo o contraseña incorrectos");
+      if (roleError || !roleData) {
+        throw new Error("Tu usuario no está vinculado a un restaurante");
       }
 
-      if (data.restaurante) {
-        setRestaurante({
-          id: data.restaurante.id,
-          nombre: data.restaurante.nombre,
-          correo: data.restaurante.correo,
-          ruc: data.restaurante.ruc,
-          telefono: data.restaurante.telefono,
-          direccion: data.restaurante.direccion,
-        });
+      // 3. Get restaurant data
+      const { data: restauranteData, error: restauranteError } = await supabase
+        .from("restaurantes")
+        .select("*")
+        .eq("id", roleData.restaurante_id)
+        .single();
 
-        toast.success(`¡Bienvenido, ${data.restaurante.nombre}!`);
-        navigate("/app/dashboard");
-      } else {
+      if (restauranteError || !restauranteData) {
         throw new Error("No se encontró información del restaurante");
       }
+
+      // 4. Set restaurant context
+      setRestaurante({
+        id: restauranteData.id,
+        nombre: restauranteData.nombre,
+        correo: restauranteData.correo,
+        ruc: restauranteData.ruc,
+        telefono: restauranteData.telefono,
+        direccion: restauranteData.direccion,
+      });
+
+      toast.success(`¡Bienvenido, ${restauranteData.nombre}!`);
+      navigate("/app/dashboard");
     } catch (error: any) {
       console.error("Login error:", error);
       toast.error(error.message || "Error al iniciar sesión");
