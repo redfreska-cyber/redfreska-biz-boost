@@ -31,57 +31,26 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      // 1. Create Supabase auth user
+      // Create auth user with restaurant metadata - the trigger will create restaurante and role
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.correo,
         password: formData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            nombre: formData.nombre,
+            ruc: formData.ruc,
+            telefono: formData.telefono,
+            direccion: formData.direccion,
+          },
         },
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Error al crear usuario");
 
-      // 2. Create restaurant in Supabase
-      const { data: restauranteData, error: restauranteError } = await supabase
-        .from("restaurantes")
-        .insert({
-          nombre: formData.nombre,
-          ruc: formData.ruc,
-          correo: formData.correo,
-          telefono: formData.telefono,
-          direccion: formData.direccion,
-        })
-        .select()
-        .single();
-
-      if (restauranteError) throw restauranteError;
-      if (!restauranteData) throw new Error("Error al crear restaurante");
-
-      // 3. Create user role (admin)
-      const { error: roleError } = await supabase
-        .from("user_roles")
-        .insert({
-          user_id: authData.user.id,
-          restaurante_id: restauranteData.id,
-          role: "admin",
-        });
-
-      if (roleError) throw roleError;
-
-      // 4. Set restaurant context
-      setRestaurante({
-        id: restauranteData.id,
-        nombre: restauranteData.nombre,
-        correo: restauranteData.correo,
-        ruc: restauranteData.ruc,
-        telefono: restauranteData.telefono,
-        direccion: restauranteData.direccion,
-      });
-
-      toast.success("¡Cuenta creada exitosamente!");
-      navigate("/app/dashboard");
+      toast.success("¡Cuenta creada exitosamente! Por favor verifica tu correo electrónico.");
+      navigate("/login");
     } catch (error: any) {
       console.error("Signup error:", error);
       toast.error(error.message || "Error al crear la cuenta");
