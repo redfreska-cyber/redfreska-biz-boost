@@ -68,6 +68,39 @@ const Dashboard = () => {
     }
   };
 
+  // Realtime updates for dashboard stats
+  useEffect(() => {
+    if (!restaurante?.id) return;
+
+    const channel = supabase
+      .channel('dashboard-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'clientes', filter: `restaurante_id=eq.${restaurante.id}` },
+        fetchStats
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'referidos', filter: `restaurante_id=eq.${restaurante.id}` },
+        fetchStats
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'conversiones', filter: `restaurante_id=eq.${restaurante.id}` },
+        fetchStats
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'premios', filter: `restaurante_id=eq.${restaurante.id}` },
+        fetchStats
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [restaurante?.id]);
+
   const statCards = [
     {
       title: "Total Clientes",

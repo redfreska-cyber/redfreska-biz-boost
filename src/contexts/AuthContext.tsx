@@ -82,31 +82,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (!session) {
-          setRestaurante(null);
-          setUsuario(null);
-        } else if (session.user) {
-          // Fetch restaurante data when user logs in
-          await fetchRestauranteData(session.user.id);
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Set up auth state listener (sync only). Defer Supabase calls to avoid deadlocks
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchRestauranteData(session.user.id);
+
+      if (!session) {
+        setRestaurante(null);
+        setUsuario(null);
+      } else if (session.user) {
+        setTimeout(() => {
+          fetchRestauranteData(session.user!.id);
+        }, 0);
       }
-      
+      setLoading(false);
+    });
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (session?.user) {
+        // Defer to avoid deadlocks
+        setTimeout(() => {
+          fetchRestauranteData(session.user!.id);
+        }, 0);
+      }
+
       setLoading(false);
     });
 
