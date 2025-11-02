@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -12,31 +14,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import ClienteDialog from "@/components/ClienteDialog";
 
-const Clientes = () => {
+const Usuarios = () => {
   const { restaurante } = useAuth();
-  const [clientes, setClientes] = useState<any[]>([]);
+  const [usuarios, setUsuarios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (restaurante?.id) {
-      fetchClientes();
+      fetchUsuarios();
     }
   }, [restaurante]);
 
-  const fetchClientes = async () => {
+  const fetchUsuarios = async () => {
     try {
       const { data, error } = await supabase
-        .from("clientes")
+        .from("usuarios")
         .select("*")
         .eq("restaurante_id", restaurante?.id)
-        .order("fecha_registro", { ascending: false });
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setClientes(data || []);
+      setUsuarios(data || []);
     } catch (error: any) {
-      toast.error("Error al cargar clientes");
+      toast.error("Error al cargar usuarios");
     } finally {
       setLoading(false);
     }
@@ -46,49 +47,54 @@ const Clientes = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Clientes</h1>
+          <h1 className="text-3xl font-bold mb-2">Usuarios</h1>
           <p className="text-muted-foreground">
-            Gestiona los clientes de tu restaurante
+            Gestiona los usuarios del restaurante
           </p>
         </div>
-        <ClienteDialog onClienteCreated={fetchClientes} />
+        <Button>
+          <Plus className="w-4 h-4 mr-2" />
+          Nuevo Usuario
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Clientes</CardTitle>
+          <CardTitle>Lista de Usuarios</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
             <p className="text-center py-8">Cargando...</p>
-          ) : clientes.length === 0 ? (
+          ) : usuarios.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              No hay clientes registrados
+              No hay usuarios registrados
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
-                  <TableHead>Teléfono</TableHead>
                   <TableHead>Correo</TableHead>
-                  <TableHead>Código</TableHead>
+                  <TableHead>Teléfono</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clientes.map((cliente) => (
-                  <TableRow key={cliente.id}>
-                    <TableCell className="font-medium">{cliente.nombre}</TableCell>
-                    <TableCell>{cliente.telefono || "-"}</TableCell>
-                    <TableCell>{cliente.correo || "-"}</TableCell>
+                {usuarios.map((usuario) => (
+                  <TableRow key={usuario.id}>
+                    <TableCell>{usuario.nombre}</TableCell>
+                    <TableCell>{usuario.correo || "-"}</TableCell>
+                    <TableCell>{usuario.telefono || "-"}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{cliente.codigo_referido}</Badge>
+                      <Badge variant={usuario.estado === "activo" ? "default" : "secondary"}>
+                        {usuario.estado}
+                      </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={cliente.estado === "activo" ? "default" : "secondary"}>
-                        {cliente.estado}
-                      </Badge>
+                      <Button size="sm" variant="outline">
+                        Editar
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -101,4 +107,4 @@ const Clientes = () => {
   );
 };
 
-export default Clientes;
+export default Usuarios;
