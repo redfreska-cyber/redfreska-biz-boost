@@ -40,24 +40,73 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch restaurante data when user is authenticated
+  const fetchRestauranteData = async (userId: string) => {
+    try {
+      // Get user's restaurante_id from user_roles
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("restaurante_id, role")
+        .eq("user_id", userId)
+        .single();
+
+      if (roleError || !roleData) {
+        console.error("Error fetching user role:", roleError);
+        return;
+      }
+
+      // Get restaurant data
+      const { data: restauranteData, error: restauranteError } = await supabase
+        .from("restaurantes")
+        .select("*")
+        .eq("id", roleData.restaurante_id)
+        .single();
+
+      if (restauranteError || !restauranteData) {
+        console.error("Error fetching restaurant:", restauranteError);
+        return;
+      }
+
+      // Set restaurant context
+      setRestaurante({
+        id: restauranteData.id,
+        nombre: restauranteData.nombre,
+        correo: restauranteData.correo || "",
+        ruc: restauranteData.ruc,
+        telefono: restauranteData.telefono,
+        direccion: restauranteData.direccion,
+      });
+    } catch (error) {
+      console.error("Error loading restaurant data:", error);
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (!session) {
           setRestaurante(null);
           setUsuario(null);
+        } else if (session.user) {
+          // Fetch restaurante data when user logs in
+          await fetchRestauranteData(session.user.id);
         }
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        await fetchRestauranteData(session.user.id);
+      }
+      
       setLoading(false);
     });
 
