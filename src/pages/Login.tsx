@@ -5,13 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+
 import { toast } from "sonner";
 import { Utensils, ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setRestaurante } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     correo: "",
@@ -27,48 +26,14 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // 1. Supabase Auth login
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      const { error: authError } = await supabase.auth.signInWithPassword({
         email: formData.correo,
         password: formData.password,
       });
 
       if (authError) throw authError;
-      if (!authData.user) throw new Error("Error al iniciar sesión");
 
-      // 2. Get user's restaurante_id from user_roles
-      const { data: roleData, error: roleError } = await supabase
-        .from("user_roles")
-        .select("restaurante_id, role")
-        .eq("user_id", authData.user.id)
-        .single();
-
-      if (roleError || !roleData) {
-        throw new Error("Tu usuario no está vinculado a un restaurante");
-      }
-
-      // 3. Get restaurant data
-      const { data: restauranteData, error: restauranteError } = await supabase
-        .from("restaurantes")
-        .select("*")
-        .eq("id", roleData.restaurante_id)
-        .single();
-
-      if (restauranteError || !restauranteData) {
-        throw new Error("No se encontró información del restaurante");
-      }
-
-      // 4. Set restaurant context
-      setRestaurante({
-        id: restauranteData.id,
-        nombre: restauranteData.nombre,
-        correo: restauranteData.correo,
-        ruc: restauranteData.ruc,
-        telefono: restauranteData.telefono,
-        direccion: restauranteData.direccion,
-      });
-
-      toast.success(`¡Bienvenido, ${restauranteData.nombre}!`);
+      toast.success("¡Bienvenido!");
       navigate("/app/dashboard");
     } catch (error: any) {
       console.error("Login error:", error);
