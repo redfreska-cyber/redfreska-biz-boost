@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, UserPlus, ShoppingCart, Award } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
   const { restaurante } = useAuth();
@@ -22,13 +23,42 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      // Fetch stats from Supabase tables
-      // For now, using placeholder data
+      if (!restaurante?.id) {
+        setLoading(false);
+        return;
+      }
+
+      // Fetch total clientes
+      const { count: clientesCount } = await supabase
+        .from("clientes")
+        .select("*", { count: "exact", head: true })
+        .eq("restaurante_id", restaurante.id);
+
+      // Fetch total referidos
+      const { count: referidosCount } = await supabase
+        .from("referidos")
+        .select("*", { count: "exact", head: true })
+        .eq("restaurante_id", restaurante.id);
+
+      // Fetch conversiones confirmadas
+      const { count: conversionesCount } = await supabase
+        .from("conversiones")
+        .select("*", { count: "exact", head: true })
+        .eq("restaurante_id", restaurante.id)
+        .eq("estado", "confirmado");
+
+      // Fetch premios activos
+      const { count: premiosCount } = await supabase
+        .from("premios")
+        .select("*", { count: "exact", head: true })
+        .eq("restaurante_id", restaurante.id)
+        .eq("is_active", true);
+
       setStats({
-        totalClientes: 0,
-        totalReferidos: 0,
-        totalConversiones: 0,
-        premiosActivos: 0,
+        totalClientes: clientesCount || 0,
+        totalReferidos: referidosCount || 0,
+        totalConversiones: conversionesCount || 0,
+        premiosActivos: premiosCount || 0,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
