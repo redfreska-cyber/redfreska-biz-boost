@@ -118,10 +118,9 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
               onValueChange={(value) => setFormData({ ...formData, cliente_referido_id: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecciona un cliente" />
+                <SelectValue placeholder="Selecciona un cliente (opcional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Ninguno</SelectItem>
                 {clientes.map((cliente) => (
                   <SelectItem key={cliente.id} value={cliente.id}>
                     {cliente.nombre}
