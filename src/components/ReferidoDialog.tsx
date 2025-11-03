@@ -21,7 +21,7 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
   const [formData, setFormData] = useState({
     cliente_owner_id: "",
     codigo_referido: "",
-    cliente_referido_id: "",
+    dni_referido: "",
   });
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
         restaurante_id: restaurante?.id,
         cliente_owner_id: formData.cliente_owner_id,
         codigo_referido: formData.codigo_referido,
-        cliente_referido_id: formData.cliente_referido_id || null,
+        cliente_referido_id: null,
       });
 
       if (error) throw error;
@@ -61,7 +61,7 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
       toast.success("Referido registrado exitosamente");
       onSuccess();
       onOpenChange(false);
-      setFormData({ cliente_owner_id: "", codigo_referido: "", cliente_referido_id: "" });
+      setFormData({ cliente_owner_id: "", codigo_referido: "", dni_referido: "" });
     } catch (error: any) {
       toast.error(error.message || "Error al registrar referido");
     } finally {
@@ -112,22 +112,19 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
           </div>
 
           <div>
-            <Label htmlFor="cliente_referido_id">Cliente Referido (Opcional)</Label>
-            <Select
-              value={formData.cliente_referido_id}
-              onValueChange={(value) => setFormData({ ...formData, cliente_referido_id: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona un cliente (opcional)" />
-              </SelectTrigger>
-              <SelectContent>
-                {clientes.map((cliente) => (
-                  <SelectItem key={cliente.id} value={cliente.id}>
-                    {cliente.nombre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="dni_referido">DNI del Cliente Referido (8 dígitos)</Label>
+            <Input
+              id="dni_referido"
+              type="text"
+              value={formData.dni_referido}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "").slice(0, 8);
+                setFormData({ ...formData, dni_referido: value });
+              }}
+              placeholder="Ingrese DNI de 8 dígitos"
+              maxLength={8}
+              pattern="[0-9]{8}"
+            />
           </div>
 
           <div className="flex justify-end gap-2">
