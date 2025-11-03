@@ -67,7 +67,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProp
               type="number"
               min="1"
               value={formData.orden}
-              onChange={(e) => setFormData({ ...formData, orden: parseInt(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, orden: parseInt(e.target.value) || 1 })}
               required
             />
           </div>
@@ -89,7 +89,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProp
               type="number"
               min="1"
               value={formData.umbral}
-              onChange={(e) => setFormData({ ...formData, umbral: parseInt(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, umbral: parseInt(e.target.value) || 1 })}
               required
             />
           </div>
