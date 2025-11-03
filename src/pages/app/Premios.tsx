@@ -15,11 +15,13 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { PremioDialog } from "@/components/PremioDialog";
 
 const Premios = () => {
   const { restaurante } = useAuth();
   const [premios, setPremios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (restaurante?.id) {
@@ -68,11 +70,17 @@ const Premios = () => {
             Configura los premios por referidos
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Premio
         </Button>
       </div>
+
+      <PremioDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={fetchPremios}
+      />
 
       <Card>
         <CardHeader>

@@ -13,11 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ReferidoDialog } from "@/components/ReferidoDialog";
 
 const Referidos = () => {
   const { restaurante } = useAuth();
   const [referidos, setReferidos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (restaurante?.id) {
@@ -55,11 +57,17 @@ const Referidos = () => {
             Gestiona los referidos de tus clientes
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Registrar Referido
         </Button>
       </div>
+
+      <ReferidoDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={fetchReferidos}
+      />
 
       <Card>
         <CardHeader>

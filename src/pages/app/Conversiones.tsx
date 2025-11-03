@@ -14,11 +14,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { ConversionDialog } from "@/components/ConversionDialog";
 
 const Conversiones = () => {
   const { restaurante } = useAuth();
   const [conversiones, setConversiones] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (restaurante?.id) {
@@ -64,11 +66,17 @@ const Conversiones = () => {
             Gestiona las conversiones de referidos
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Nueva Conversión
         </Button>
       </div>
+
+      <ConversionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={fetchConversiones}
+      />
 
       <Card>
         <CardHeader>

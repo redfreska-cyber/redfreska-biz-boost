@@ -14,11 +14,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { UsuarioDialog } from "@/components/UsuarioDialog";
 
 const Usuarios = () => {
   const { restaurante } = useAuth();
   const [usuarios, setUsuarios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (restaurante?.id) {
@@ -52,11 +54,17 @@ const Usuarios = () => {
             Gestiona los usuarios del restaurante
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           Nuevo Usuario
         </Button>
       </div>
+
+      <UsuarioDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={fetchUsuarios}
+      />
 
       <Card>
         <CardHeader>
