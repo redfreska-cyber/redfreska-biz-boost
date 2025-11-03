@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -21,7 +22,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProp
     orden: 1,
     descripcion: "",
     umbral: 1,
-    tipo_premio: "",
+    tipo_premio: "cliente",
     detalle_premio: "",
   });
 
@@ -95,14 +96,19 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProp
           </div>
 
           <div>
-            <Label htmlFor="tipo_premio">Tipo de Premio</Label>
-            <Input
-              id="tipo_premio"
+            <Label htmlFor="tipo_premio">Tipo de premio (¿para quién es?)</Label>
+            <Select
               value={formData.tipo_premio}
-              onChange={(e) => setFormData({ ...formData, tipo_premio: e.target.value })}
-              placeholder="Ej: Descuento, Plato gratis, etc."
-              required
-            />
+              onValueChange={(value) => setFormData({ ...formData, tipo_premio: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona el tipo de premio" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cliente">Cliente</SelectItem>
+                <SelectItem value="referido">Referido</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -119,7 +125,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProp
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !formData.tipo_premio}>
               {loading ? "Creando..." : "Crear"}
             </Button>
           </div>
