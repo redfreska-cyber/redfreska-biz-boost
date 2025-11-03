@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,11 +24,11 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
     cliente_referido_id: "",
   });
 
-  useState(() => {
+  useEffect(() => {
     if (restaurante?.id && open) {
       fetchClientes();
     }
-  });
+  }, [restaurante?.id, open]);
 
   const fetchClientes = async () => {
     try {
