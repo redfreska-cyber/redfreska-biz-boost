@@ -80,7 +80,7 @@ const Validaciones = () => {
           if (count >= premio.umbral) {
             // Check if validation already exists
             const exists = validacionesData?.some(
-              (v) => v.cliente_id === cliente.id && v.premio_id === premio.id
+              (v) => v.cliente_id === cliente.id && (v as any).premio_id === premio.id
             );
             
             if (!exists) {

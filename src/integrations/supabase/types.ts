@@ -371,23 +371,29 @@ export type Database = {
       validaciones: {
         Row: {
           cliente_id: string
+          conversiones_realizadas: number | null
           fecha_validacion: string
           id: string
           motivo: string | null
+          premio_id: string | null
           validado: boolean | null
         }
         Insert: {
           cliente_id: string
+          conversiones_realizadas?: number | null
           fecha_validacion?: string
           id?: string
           motivo?: string | null
+          premio_id?: string | null
           validado?: boolean | null
         }
         Update: {
           cliente_id?: string
+          conversiones_realizadas?: number | null
           fecha_validacion?: string
           id?: string
           motivo?: string | null
+          premio_id?: string | null
           validado?: boolean | null
         }
         Relationships: [
@@ -396,6 +402,13 @@ export type Database = {
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "validaciones_premio_id_fkey"
+            columns: ["premio_id"]
+            isOneToOne: false
+            referencedRelation: "premios"
             referencedColumns: ["id"]
           },
         ]
