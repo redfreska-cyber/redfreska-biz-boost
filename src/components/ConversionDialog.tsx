@@ -77,7 +77,7 @@ export const ConversionDialog = ({ open, onOpenChange, onSuccess }: ConversionDi
             codigo_referido: formData.codigo_referente,
             cliente_referido_id: formData.cliente_id,
             dni_referido: formData.dni_referido,
-            consumo_realizado: formData.estado === "confirmado",
+            consumo_realizado: true,
           });
         }
       }
