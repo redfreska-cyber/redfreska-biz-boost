@@ -54,6 +54,7 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
         cliente_owner_id: formData.cliente_owner_id,
         codigo_referido: formData.codigo_referido,
         cliente_referido_id: null,
+        dni_referido: formData.dni_referido,
       });
 
       if (error) throw error;
@@ -106,7 +107,18 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
             <Input
               id="codigo_referido"
               value={formData.codigo_referido}
-              onChange={(e) => setFormData({ ...formData, codigo_referido: e.target.value })}
+              onChange={async (e) => {
+                const codigo = e.target.value;
+                setFormData({ ...formData, codigo_referido: codigo });
+                
+                // Auto-populate cliente_owner_id based on codigo_referido
+                if (codigo.trim()) {
+                  const cliente = clientes.find((c) => c.codigo_referido === codigo);
+                  if (cliente) {
+                    setFormData((prev) => ({ ...prev, cliente_owner_id: cliente.id }));
+                  }
+                }
+              }}
               required
             />
           </div>

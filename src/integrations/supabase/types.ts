@@ -161,6 +161,7 @@ export type Database = {
           codigo_referido: string
           consumo_realizado: boolean | null
           created_at: string
+          dni_referido: string | null
           fecha_registro: string | null
           id: string
           restaurante_id: string
@@ -171,6 +172,7 @@ export type Database = {
           codigo_referido: string
           consumo_realizado?: boolean | null
           created_at?: string
+          dni_referido?: string | null
           fecha_registro?: string | null
           id?: string
           restaurante_id: string
@@ -181,6 +183,7 @@ export type Database = {
           codigo_referido?: string
           consumo_realizado?: boolean | null
           created_at?: string
+          dni_referido?: string | null
           fecha_registro?: string | null
           id?: string
           restaurante_id?: string

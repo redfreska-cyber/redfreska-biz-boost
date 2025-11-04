@@ -88,7 +88,6 @@ const Referidos = () => {
                   <TableHead>Código Usado</TableHead>
                   <TableHead>Cliente Referido</TableHead>
                   <TableHead>Fecha</TableHead>
-                  <TableHead>Consumo Realizado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -96,9 +95,8 @@ const Referidos = () => {
                   <TableRow key={referido.id}>
                     <TableCell>{referido.cliente_owner?.nombre || "-"}</TableCell>
                     <TableCell>{referido.codigo_referido}</TableCell>
-                    <TableCell>{referido.cliente_referido?.nombre || "Pendiente"}</TableCell>
+                    <TableCell>{referido.dni_referido || "Pendiente"}</TableCell>
                     <TableCell>{new Date(referido.fecha_registro).toLocaleDateString()}</TableCell>
-                    <TableCell>{referido.consumo_realizado ? "Sí" : "No"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
