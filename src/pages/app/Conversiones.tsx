@@ -110,8 +110,27 @@ const Conversiones = () => {
                     <TableCell>{conversion.codigo_referente || "-"}</TableCell>
                     <TableCell>{getEstadoBadge(conversion.estado)}</TableCell>
                     <TableCell>
-                      <Button size="sm" variant="outline">
-                        Ver Detalle
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={async () => {
+                          if (conversion.estado === "pendiente") {
+                            const { error } = await supabase
+                              .from("conversiones")
+                              .update({ estado: "confirmado" })
+                              .eq("id", conversion.id);
+                            
+                            if (error) {
+                              toast.error("Error al confirmar");
+                            } else {
+                              toast.success("Referido confirmado");
+                              fetchConversiones();
+                            }
+                          }
+                        }}
+                        disabled={conversion.estado !== "pendiente"}
+                      >
+                        {conversion.estado === "pendiente" ? "Confirmar" : "Confirmado"}
                       </Button>
                     </TableCell>
                   </TableRow>

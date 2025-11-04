@@ -58,7 +58,28 @@ export const ConversionDialog = ({ open, onOpenChange, onSuccess }: ConversionDi
 
       if (error) throw error;
 
-      toast.success("Conversión registrada exitosamente");
+      // También crear el registro en referidos si es confirmado
+      if (formData.estado === "confirmado" && formData.codigo_referente) {
+        // Buscar el cliente owner por código
+        const { data: clienteOwner } = await supabase
+          .from("clientes")
+          .select("id")
+          .eq("codigo_referido", formData.codigo_referente)
+          .eq("restaurante_id", restaurante?.id)
+          .single();
+
+        if (clienteOwner) {
+          await supabase.from("referidos").insert({
+            restaurante_id: restaurante?.id,
+            cliente_owner_id: clienteOwner.id,
+            codigo_referido: formData.codigo_referente,
+            cliente_referido_id: formData.cliente_id,
+            consumo_realizado: true,
+          });
+        }
+      }
+
+      toast.success("Referido registrado exitosamente");
       onSuccess();
       onOpenChange(false);
       setFormData({ cliente_id: "", codigo_referente: "", estado: "pendiente" });
@@ -73,7 +94,7 @@ export const ConversionDialog = ({ open, onOpenChange, onSuccess }: ConversionDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nueva Conversión</DialogTitle>
+          <DialogTitle>Nuevo Referido</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -59,7 +59,7 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
 
       if (error) throw error;
 
-      toast.success("Referido registrado exitosamente");
+      toast.success("Conversión registrada exitosamente");
       onSuccess();
       onOpenChange(false);
       setFormData({ cliente_owner_id: "", codigo_referido: "", dni_referido: "" });
@@ -74,7 +74,7 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Registrar Referido</DialogTitle>
+          <DialogTitle>Registrar Conversión</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
