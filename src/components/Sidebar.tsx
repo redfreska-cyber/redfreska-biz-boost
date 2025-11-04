@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/app/dashboard" },
   { title: "Clientes", icon: Users, url: "/app/clientes" },
-  { title: "Referidos", icon: UserPlus, url: "/app/referidos" },
-  { title: "Conversiones", icon: ShoppingCart, url: "/app/conversiones" },
+  { title: "Conversiones", icon: UserPlus, url: "/app/referidos" },
+  { title: "Referidos", icon: ShoppingCart, url: "/app/conversiones" },
   { title: "Premios", icon: Award, url: "/app/premios" },
   { title: "Validaciones", icon: CheckCircle, url: "/app/validaciones" },
   { title: "Usuarios", icon: UsersRound, url: "/app/usuarios" },

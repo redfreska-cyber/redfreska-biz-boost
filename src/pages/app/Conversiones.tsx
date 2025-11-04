@@ -61,14 +61,14 @@ const Conversiones = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Conversiones</h1>
+          <h1 className="text-3xl font-bold mb-2">Referidos</h1>
           <p className="text-muted-foreground">
-            Gestiona las conversiones de referidos
+            Gestiona los referidos de tus clientes
           </p>
         </div>
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Nueva Conversión
+          Nuevo Referido
         </Button>
       </div>
 
@@ -80,7 +80,7 @@ const Conversiones = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Conversiones</CardTitle>
+          <CardTitle>Lista de Referidos</CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
