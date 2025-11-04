@@ -97,7 +97,6 @@ const Conversiones = () => {
                   <TableHead>Cliente Dueño</TableHead>
                   <TableHead>Código</TableHead>
                   <TableHead>Cliente Referido</TableHead>
-                  <TableHead>DNI Referido</TableHead>
                   <TableHead>Estado</TableHead>
                 </TableRow>
               </TableHeader>
@@ -109,7 +108,6 @@ const Conversiones = () => {
                     </TableCell>
                     <TableCell>{conversion.cliente_owner?.nombre || "-"}</TableCell>
                     <TableCell>{conversion.codigo_referido || "-"}</TableCell>
-                    <TableCell>{conversion.cliente_referido?.nombre || "-"}</TableCell>
                     <TableCell>{conversion.dni_referido || "-"}</TableCell>
                     <TableCell>{getConsumoRealizadoBadge(conversion.consumo_realizado)}</TableCell>
                   </TableRow>
