@@ -55,6 +55,7 @@ export const ReferidoDialog = ({ open, onOpenChange, onSuccess }: ReferidoDialog
         codigo_referido: formData.codigo_referido,
         cliente_referido_id: null,
         dni_referido: formData.dni_referido,
+        consumo_realizado: true,
       });
 
       if (error) throw error;
