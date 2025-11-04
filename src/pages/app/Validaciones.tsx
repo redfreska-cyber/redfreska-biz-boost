@@ -71,6 +71,9 @@ const Validaciones = () => {
         referidosCounts[ref.cliente_owner_id] = (referidosCounts[ref.cliente_owner_id] || 0) + 1;
       });
 
+      console.log("Conteo de referidos por cliente:", referidosCounts);
+      console.log("Premios activos:", premiosData);
+
       // Check for new validaciones to create
       const newValidaciones = [];
       for (const cliente of clientesData || []) {
@@ -82,6 +85,8 @@ const Validaciones = () => {
             const exists = validacionesData?.some(
               (v) => v.cliente_id === cliente.id && (v as any).premio_id === premio.id
             );
+            
+            console.log(`Cliente ${cliente.nombre} alcanzó umbral ${premio.umbral} con ${count} referidos. ¿Ya existe validación? ${exists}`);
             
             if (!exists) {
               newValidaciones.push({
@@ -95,13 +100,21 @@ const Validaciones = () => {
         }
       }
 
+      console.log("Nuevas validaciones a crear:", newValidaciones);
+
       // Insert new validaciones
       if (newValidaciones.length > 0) {
-        const { error: insertError } = await supabase
+        const { data: insertData, error: insertError } = await supabase
           .from("validaciones")
-          .insert(newValidaciones);
+          .insert(newValidaciones)
+          .select();
 
-        if (insertError) throw insertError;
+        console.log("Resultado de inserción:", insertData, insertError);
+
+        if (insertError) {
+          console.error("Error al insertar validaciones:", insertError);
+          throw insertError;
+        }
 
         // Refetch validaciones
         const { data: updatedData, error: refetchError } = await supabase
@@ -123,7 +136,7 @@ const Validaciones = () => {
       }
     } catch (error: any) {
       toast.error("Error al cargar validaciones");
-      console.error(error);
+      console.error("Error en fetchValidaciones:", error);
     } finally {
       setLoading(false);
     }
@@ -180,9 +193,14 @@ const Validaciones = () => {
           {loading ? (
             <p className="text-center py-8">Cargando...</p>
           ) : validaciones.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">
-              No hay validaciones pendientes
-            </p>
+            <div className="text-center py-8 space-y-2">
+              <p className="text-muted-foreground">
+                No hay validaciones pendientes
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Las validaciones se generan automáticamente cuando un cliente alcanza el umbral de un premio
+              </p>
+            </div>
           ) : (
             <Table>
               <TableHeader>
