@@ -59,6 +59,7 @@ export type Database = {
         Row: {
           cliente_id: string
           codigo_referente: string | null
+          dni_referido: string | null
           estado: string | null
           fecha_conversion: string
           id: string
@@ -69,6 +70,7 @@ export type Database = {
         Insert: {
           cliente_id: string
           codigo_referente?: string | null
+          dni_referido?: string | null
           estado?: string | null
           fecha_conversion?: string
           id?: string
@@ -79,6 +81,7 @@ export type Database = {
         Update: {
           cliente_id?: string
           codigo_referente?: string | null
+          dni_referido?: string | null
           estado?: string | null
           fecha_conversion?: string
           id?: string

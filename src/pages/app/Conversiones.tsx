@@ -31,30 +31,30 @@ const Conversiones = () => {
   const fetchConversiones = async () => {
     try {
       const { data, error } = await supabase
-        .from("conversiones")
+        .from("referidos")
         .select(`
           *,
-          cliente:clientes(nombre)
+          cliente_owner:clientes!referidos_cliente_owner_id_fkey(nombre),
+          cliente_referido:clientes!referidos_cliente_referido_id_fkey(nombre)
         `)
         .eq("restaurante_id", restaurante?.id)
-        .order("fecha_conversion", { ascending: false });
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setConversiones(data || []);
     } catch (error: any) {
-      toast.error("Error al cargar conversiones");
+      toast.error("Error al cargar referidos");
     } finally {
       setLoading(false);
     }
   };
 
-  const getEstadoBadge = (estado: string) => {
-    const variants: any = {
-      pendiente: "secondary",
-      confirmado: "default",
-      rechazado: "destructive",
-    };
-    return <Badge variant={variants[estado] || "secondary"}>{estado}</Badge>;
+  const getConsumoRealizadoBadge = (consumo: boolean) => {
+    return (
+      <Badge variant={consumo ? "default" : "secondary"}>
+        {consumo ? "Confirmado" : "Pendiente"}
+      </Badge>
+    );
   };
 
   return (
@@ -87,52 +87,31 @@ const Conversiones = () => {
             <p className="text-center py-8">Cargando...</p>
           ) : conversiones.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              No hay conversiones registradas
+              No hay referidos registrados
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Fecha</TableHead>
-                  <TableHead>Cliente</TableHead>
+                  <TableHead>Cliente Dueño</TableHead>
                   <TableHead>Código</TableHead>
+                  <TableHead>Cliente Referido</TableHead>
+                  <TableHead>DNI Referido</TableHead>
                   <TableHead>Estado</TableHead>
-                  <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {conversiones.map((conversion) => (
                   <TableRow key={conversion.id}>
                     <TableCell>
-                      {new Date(conversion.fecha_conversion).toLocaleDateString()}
+                      {new Date(conversion.created_at).toLocaleDateString()}
                     </TableCell>
-                    <TableCell>{conversion.cliente?.nombre || "-"}</TableCell>
-                    <TableCell>{conversion.codigo_referente || "-"}</TableCell>
-                    <TableCell>{getEstadoBadge(conversion.estado)}</TableCell>
-                    <TableCell>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={async () => {
-                          if (conversion.estado === "pendiente") {
-                            const { error } = await supabase
-                              .from("conversiones")
-                              .update({ estado: "confirmado" })
-                              .eq("id", conversion.id);
-                            
-                            if (error) {
-                              toast.error("Error al confirmar");
-                            } else {
-                              toast.success("Referido confirmado");
-                              fetchConversiones();
-                            }
-                          }
-                        }}
-                        disabled={conversion.estado !== "pendiente"}
-                      >
-                        {conversion.estado === "pendiente" ? "Confirmar" : "Confirmado"}
-                      </Button>
-                    </TableCell>
+                    <TableCell>{conversion.cliente_owner?.nombre || "-"}</TableCell>
+                    <TableCell>{conversion.codigo_referido || "-"}</TableCell>
+                    <TableCell>{conversion.cliente_referido?.nombre || "-"}</TableCell>
+                    <TableCell>{conversion.dni_referido || "-"}</TableCell>
+                    <TableCell>{getConsumoRealizadoBadge(conversion.consumo_realizado)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

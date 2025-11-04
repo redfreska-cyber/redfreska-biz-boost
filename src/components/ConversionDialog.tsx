@@ -21,6 +21,7 @@ export const ConversionDialog = ({ open, onOpenChange, onSuccess }: ConversionDi
   const [formData, setFormData] = useState({
     cliente_id: "",
     codigo_referente: "",
+    dni_referido: "",
     estado: "pendiente",
   });
 
@@ -53,13 +54,14 @@ export const ConversionDialog = ({ open, onOpenChange, onSuccess }: ConversionDi
         restaurante_id: restaurante?.id,
         cliente_id: formData.cliente_id,
         codigo_referente: formData.codigo_referente,
+        dni_referido: formData.dni_referido,
         estado: formData.estado,
       });
 
       if (error) throw error;
 
-      // También crear el registro en referidos si es confirmado
-      if (formData.estado === "confirmado" && formData.codigo_referente) {
+      // Siempre crear el registro en referidos cuando hay código referente
+      if (formData.codigo_referente) {
         // Buscar el cliente owner por código
         const { data: clienteOwner } = await supabase
           .from("clientes")
@@ -74,7 +76,8 @@ export const ConversionDialog = ({ open, onOpenChange, onSuccess }: ConversionDi
             cliente_owner_id: clienteOwner.id,
             codigo_referido: formData.codigo_referente,
             cliente_referido_id: formData.cliente_id,
-            consumo_realizado: true,
+            dni_referido: formData.dni_referido,
+            consumo_realizado: formData.estado === "confirmado",
           });
         }
       }
@@ -82,7 +85,7 @@ export const ConversionDialog = ({ open, onOpenChange, onSuccess }: ConversionDi
       toast.success("Referido registrado exitosamente");
       onSuccess();
       onOpenChange(false);
-      setFormData({ cliente_id: "", codigo_referente: "", estado: "pendiente" });
+      setFormData({ cliente_id: "", codigo_referente: "", dni_referido: "", estado: "pendiente" });
     } catch (error: any) {
       toast.error(error.message || "Error al registrar conversión");
     } finally {
@@ -123,6 +126,22 @@ export const ConversionDialog = ({ open, onOpenChange, onSuccess }: ConversionDi
               value={formData.codigo_referente}
               onChange={(e) => setFormData({ ...formData, codigo_referente: e.target.value })}
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="dni_referido">DNI del Cliente Referido (8 dígitos)</Label>
+            <Input
+              id="dni_referido"
+              type="text"
+              value={formData.dni_referido}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "").slice(0, 8);
+                setFormData({ ...formData, dni_referido: value });
+              }}
+              placeholder="Ingrese DNI de 8 dígitos"
+              maxLength={8}
+              pattern="[0-9]{8}"
             />
           </div>
 
