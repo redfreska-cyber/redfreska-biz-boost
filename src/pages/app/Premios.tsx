@@ -62,6 +62,23 @@ const Premios = () => {
     }
   };
 
+  const deletePremio = async (id: string) => {
+    if (!confirm("¿Estás seguro de eliminar este premio?")) return;
+    
+    try {
+      const { error } = await supabase
+        .from("premios")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+      toast.success("Premio eliminado");
+      fetchPremios();
+    } catch (error: any) {
+      toast.error("Error al eliminar premio");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -102,6 +119,7 @@ const Premios = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Orden</TableHead>
                   <TableHead>Descripción</TableHead>
                   <TableHead>Umbral</TableHead>
                   <TableHead>Tipo</TableHead>
@@ -112,6 +130,7 @@ const Premios = () => {
               <TableBody>
                 {premios.map((premio) => (
                   <TableRow key={premio.id}>
+                    <TableCell>{premio.orden}</TableCell>
                     <TableCell>{premio.descripcion}</TableCell>
                     <TableCell>{premio.umbral ? `${premio.umbral} referidos` : 'N/A'}</TableCell>
                     <TableCell>
@@ -124,16 +143,25 @@ const Premios = () => {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedPremio(premio);
-                          setDialogOpen(true);
-                        }}
-                      >
-                        Editar
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedPremio(premio);
+                            setDialogOpen(true);
+                          }}
+                        >
+                          Editar
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          onClick={() => deletePremio(premio.id)}
+                        >
+                          Eliminar
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
