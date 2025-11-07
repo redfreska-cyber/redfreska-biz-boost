@@ -102,7 +102,6 @@ const Premios = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Orden</TableHead>
                   <TableHead>Descripción</TableHead>
                   <TableHead>Umbral</TableHead>
                   <TableHead>Tipo</TableHead>
@@ -113,9 +112,8 @@ const Premios = () => {
               <TableBody>
                 {premios.map((premio) => (
                   <TableRow key={premio.id}>
-                    <TableCell>{premio.orden}</TableCell>
                     <TableCell>{premio.descripcion}</TableCell>
-                    <TableCell>{premio.umbral} referidos</TableCell>
+                    <TableCell>{premio.umbral ? `${premio.umbral} referidos` : 'N/A'}</TableCell>
                     <TableCell>
                       <Badge>{premio.tipo_premio}</Badge>
                     </TableCell>
