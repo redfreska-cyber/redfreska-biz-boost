@@ -32,17 +32,19 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDi
     setLoading(true);
 
     try {
+      const dataToSave = {
+        orden: formData.orden,
+        descripcion: formData.descripcion,
+        umbral: formData.tipo_premio === "cliente" ? formData.umbral : null,
+        tipo_premio: formData.tipo_premio,
+        detalle_premio: formData.detalle_premio,
+      };
+
       if (premio) {
         // Actualizar premio existente
         const { error } = await supabase
           .from("premios")
-          .update({
-            orden: formData.orden,
-            descripcion: formData.descripcion,
-            umbral: formData.umbral,
-            tipo_premio: formData.tipo_premio,
-            detalle_premio: formData.detalle_premio,
-          })
+          .update(dataToSave)
           .eq("id", premio.id);
 
         if (error) throw error;
@@ -51,11 +53,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDi
         // Crear nuevo premio
         const { error } = await supabase.from("premios").insert({
           restaurante_id: restaurante?.id,
-          orden: formData.orden,
-          descripcion: formData.descripcion,
-          umbral: formData.umbral,
-          tipo_premio: formData.tipo_premio,
-          detalle_premio: formData.detalle_premio,
+          ...dataToSave,
           is_active: true,
         });
 
@@ -103,18 +101,6 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDi
           </div>
 
           <div>
-            <Label htmlFor="umbral">Umbral (cantidad de referidos)</Label>
-            <Input
-              id="umbral"
-              type="number"
-              min="1"
-              value={formData.umbral}
-              onChange={(e) => setFormData({ ...formData, umbral: parseInt(e.target.value) || 1 })}
-              required
-            />
-          </div>
-
-          <div>
             <Label htmlFor="tipo_premio">Tipo de premio (¿para quién es?)</Label>
             <Select
               value={formData.tipo_premio}
@@ -129,6 +115,20 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDi
               </SelectContent>
             </Select>
           </div>
+
+          {formData.tipo_premio === "cliente" && (
+            <div>
+              <Label htmlFor="umbral">Umbral (cantidad de referidos)</Label>
+              <Input
+                id="umbral"
+                type="number"
+                min="1"
+                value={formData.umbral}
+                onChange={(e) => setFormData({ ...formData, umbral: parseInt(e.target.value) || 1 })}
+                required
+              />
+            </div>
+          )}
 
           <div>
             <Label htmlFor="detalle_premio">Detalle del Premio</Label>

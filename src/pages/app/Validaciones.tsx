@@ -89,12 +89,13 @@ const Validaciones = () => {
 
       if (clientesError) throw clientesError;
 
-      // 3) Traer premios activos ordenados por umbral
+      // 3) Traer premios activos solo tipo "cliente" ordenados por umbral
       const { data: premiosData, error: premiosError } = await supabase
         .from("premios")
         .select("*")
         .eq("restaurante_id", restaurante?.id)
         .eq("is_active", true)
+        .eq("tipo_premio", "cliente")
         .order("umbral", { ascending: true });
 
       if (premiosError) throw premiosError;
