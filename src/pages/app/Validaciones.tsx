@@ -25,9 +25,51 @@ const Validaciones = () => {
     }
   }, [restaurante]);
 
+  // Suscripción en tiempo real para actualizar cuando cambien referidos/premios/validaciones
+  useEffect(() => {
+    if (!restaurante?.id) return;
+
+    const channel = supabase
+      .channel("validaciones-realtime")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "referidos" },
+        () => fetchValidaciones()
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "referidos" },
+        () => fetchValidaciones()
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "referidos" },
+        () => fetchValidaciones()
+      )
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "validaciones" },
+        () => fetchValidaciones()
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "validaciones" },
+        () => fetchValidaciones()
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "premios" },
+        () => fetchValidaciones()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [restaurante?.id]);
   const fetchValidaciones = async () => {
     try {
-      // Fetch existing validaciones
+      // 1) Traer validaciones existentes
       const { data: validacionesData, error: validacionesError } = await supabase
         .from("validaciones")
         .select(`
@@ -39,7 +81,7 @@ const Validaciones = () => {
 
       if (validacionesError) throw validacionesError;
 
-      // Fetch clientes and count their referidos
+      // 2) Traer todos los clientes del restaurante
       const { data: clientesData, error: clientesError } = await supabase
         .from("clientes")
         .select("id, nombre, restaurante_id")
@@ -47,7 +89,7 @@ const Validaciones = () => {
 
       if (clientesError) throw clientesError;
 
-      // Fetch premios
+      // 3) Traer premios activos ordenados por umbral
       const { data: premiosData, error: premiosError } = await supabase
         .from("premios")
         .select("*")
@@ -57,37 +99,31 @@ const Validaciones = () => {
 
       if (premiosError) throw premiosError;
 
-      // Count referidos for each cliente
+      // 4) Contar conversiones reales (referidos confirmados)
       const { data: referidosData, error: referidosError } = await supabase
         .from("referidos")
-        .select("cliente_owner_id")
-        .eq("restaurante_id", restaurante?.id);
+        .select("cliente_owner_id, consumo_realizado")
+        .eq("restaurante_id", restaurante?.id)
+        .eq("consumo_realizado", true);
 
       if (referidosError) throw referidosError;
 
-      // Group referidos by cliente
+      // Agrupar conteos por cliente
       const referidosCounts: { [key: string]: number } = {};
       referidosData?.forEach((ref) => {
+        if (!ref || !ref.cliente_owner_id) return;
         referidosCounts[ref.cliente_owner_id] = (referidosCounts[ref.cliente_owner_id] || 0) + 1;
       });
 
-      console.log("Conteo de referidos por cliente:", referidosCounts);
-      console.log("Premios activos:", premiosData);
-
-      // Check for new validaciones to create
-      const newValidaciones = [];
+      // 5) Crear nuevas validaciones si alcanzan el umbral y no existen
+      const newValidaciones: any[] = [];
       for (const cliente of clientesData || []) {
         const count = referidosCounts[cliente.id] || 0;
-        
         for (const premio of premiosData || []) {
           if (count >= premio.umbral) {
-            // Check if validation already exists
             const exists = validacionesData?.some(
               (v) => v.cliente_id === cliente.id && (v as any).premio_id === premio.id
             );
-            
-            console.log(`Cliente ${cliente.nombre} alcanzó umbral ${premio.umbral} con ${count} referidos. ¿Ya existe validación? ${exists}`);
-            
             if (!exists) {
               newValidaciones.push({
                 cliente_id: cliente.id,
@@ -100,40 +136,60 @@ const Validaciones = () => {
         }
       }
 
-      console.log("Nuevas validaciones a crear:", newValidaciones);
+      let currentValidaciones = validacionesData || [];
 
-      // Insert new validaciones
       if (newValidaciones.length > 0) {
         const { data: insertData, error: insertError } = await supabase
           .from("validaciones")
           .insert(newValidaciones)
-          .select();
-
-        console.log("Resultado de inserción:", insertData, insertError);
-
-        if (insertError) {
-          console.error("Error al insertar validaciones:", insertError);
-          throw insertError;
-        }
-
-        // Refetch validaciones
-        const { data: updatedData, error: refetchError } = await supabase
-          .from("validaciones")
           .select(`
             *,
             cliente:clientes(nombre, restaurante_id),
             premio:premios(descripcion, umbral, detalle_premio)
-          `)
-          .order("fecha_validacion", { ascending: false });
+          `);
 
-        if (refetchError) throw refetchError;
-        
-        const filtered = updatedData?.filter((v) => v.cliente?.restaurante_id === restaurante?.id) || [];
-        setValidaciones(filtered);
-      } else {
-        const filtered = validacionesData?.filter((v) => v.cliente?.restaurante_id === restaurante?.id) || [];
-        setValidaciones(filtered);
+        if (insertError) throw insertError;
+
+        // Mezclar con existentes
+        currentValidaciones = [...(currentValidaciones || []), ...(insertData || [])];
       }
+
+      // Filtrar por restaurante
+      const filtered = currentValidaciones.filter((v) => v.cliente?.restaurante_id === restaurante?.id);
+
+      // 6) Construir filas para TODOS los clientes (aunque no tengan validación)
+      const rows = (clientesData || []).map((cliente) => {
+        const count = referidosCounts[cliente.id] || 0;
+        // Validación pendiente/última si existe
+        const v =
+          filtered.find((x) => x.cliente_id === cliente.id && !x.validado) ||
+          filtered.find((x) => x.cliente_id === cliente.id);
+
+        // Premio objetivo: el de la validación si existe; si no, el siguiente premio por alcanzar
+        const premioTarget =
+          v?.premio ||
+          (premiosData || []).find((p) => p.umbral >= count) ||
+          (premiosData || [])[Math.max(0, (premiosData?.length || 1) - 1)];
+
+        return {
+          ...(v || {}),
+          id: v?.id || `placeholder-${cliente.id}`,
+          cliente: { nombre: cliente.nombre, restaurante_id: cliente.restaurante_id },
+          premio: premioTarget
+            ? {
+                descripcion: premioTarget.descripcion,
+                umbral: premioTarget.umbral,
+                detalle_premio: premioTarget.detalle_premio,
+              }
+            : null,
+          conversiones_realizadas: count,
+          fecha_validacion: v?.fecha_validacion || null,
+          validado: v?.validado || false,
+          _isPlaceholder: !v,
+        } as any;
+      });
+
+      setValidaciones(rows);
     } catch (error: any) {
       toast.error("Error al cargar validaciones");
       console.error("Error en fetchValidaciones:", error);
@@ -214,43 +270,54 @@ const Validaciones = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {validaciones.map((validacion) => (
-                  <TableRow key={validacion.id}>
-                    <TableCell>{validacion.cliente?.nombre || "-"}</TableCell>
-                    <TableCell>{validacion.premio?.descripcion || "-"}</TableCell>
-                    <TableCell>
-                      {validacion.conversiones_realizadas || 0} / {validacion.premio?.umbral || 0}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(validacion.fecha_validacion).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={validacion.validado ? "default" : "secondary"}>
-                        {validacion.validado ? "Entregado" : "Pendiente"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {!validacion.validado && (
-                        <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => handleAprobar(validacion.id)}
-                          >
-                            Aprobar
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="destructive"
-                            onClick={() => handleRechazar(validacion.id)}
-                          >
-                            Rechazar
-                          </Button>
-                        </div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {validaciones.map((validacion) => {
+                  const isPlaceholder = (validacion as any)._isPlaceholder;
+                  const estadoLabel = validacion.validado
+                    ? "Entregado"
+                    : isPlaceholder
+                    ? "En progreso"
+                    : "Pendiente";
+
+                  return (
+                    <TableRow key={validacion.id}>
+                      <TableCell>{validacion.cliente?.nombre || "-"}</TableCell>
+                      <TableCell>{validacion.premio?.descripcion || "-"}</TableCell>
+                      <TableCell>
+                        {validacion.conversiones_realizadas || 0} / {validacion.premio?.umbral || 0}
+                      </TableCell>
+                      <TableCell>
+                        {validacion.fecha_validacion
+                          ? new Date(validacion.fecha_validacion).toLocaleDateString()
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={validacion.validado ? "default" : "secondary"}>
+                          {estadoLabel}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {!validacion.validado && !isPlaceholder && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAprobar(validacion.id)}
+                            >
+                              Aprobar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleRechazar(validacion.id)}
+                            >
+                              Rechazar
+                            </Button>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
