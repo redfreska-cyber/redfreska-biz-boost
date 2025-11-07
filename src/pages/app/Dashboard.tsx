@@ -40,12 +40,12 @@ const Dashboard = () => {
         .select("*", { count: "exact", head: true })
         .eq("restaurante_id", restaurante.id);
 
-      // Fetch conversiones confirmadas
+      // Fetch conversiones confirmadas (referidos con consumo realizado)
       const { count: conversionesCount } = await supabase
-        .from("conversiones")
+        .from("referidos")
         .select("*", { count: "exact", head: true })
         .eq("restaurante_id", restaurante.id)
-        .eq("estado", "confirmado");
+        .eq("consumo_realizado", true);
 
       // Fetch premios activos
       const { count: premiosCount } = await supabase
