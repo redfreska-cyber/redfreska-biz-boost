@@ -12,9 +12,9 @@ const Dashboard = () => {
     totalReferidos: 0,
     totalConversiones: 0,
     premiosActivos: 0,
+    premiosEntregados: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [conversionesRecientes, setConversionesRecientes] = useState<any[]>([]);
   const [topClientes, setTopClientes] = useState<any[]>([]);
 
   useEffect(() => {
@@ -56,26 +56,20 @@ const Dashboard = () => {
         .eq("restaurante_id", restaurante.id)
         .eq("is_active", true);
 
+      // Fetch premios entregados (validaciones aprobadas)
+      const { count: premiosEntregadosCount } = await supabase
+        .from("validaciones")
+        .select("*, clientes!inner(restaurante_id)", { count: "exact", head: true })
+        .eq("clientes.restaurante_id", restaurante.id)
+        .eq("validado", true);
+
       setStats({
         totalClientes: clientesCount || 0,
         totalReferidos: referidosCount || 0,
         totalConversiones: conversionesCount || 0,
         premiosActivos: premiosCount || 0,
+        premiosEntregados: premiosEntregadosCount || 0,
       });
-
-      // Fetch conversiones recientes
-      const { data: conversiones } = await supabase
-        .from("referidos")
-        .select(`
-          *,
-          cliente_owner:clientes!cliente_owner_id(nombre, dni_referido)
-        `)
-        .eq("restaurante_id", restaurante.id)
-        .eq("consumo_realizado", true)
-        .order("created_at", { ascending: false })
-        .limit(5);
-
-      setConversionesRecientes(conversiones || []);
 
       // Fetch top clientes (clientes con más referidos confirmados)
       const { data: clientes } = await supabase
@@ -181,6 +175,13 @@ const Dashboard = () => {
       color: "text-secondary",
       bgColor: "bg-secondary/10",
     },
+    {
+      title: "Premios Entregados",
+      value: stats.premiosEntregados,
+      icon: Award,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
   ];
 
   if (loading) {
@@ -201,7 +202,7 @@ const Dashboard = () => {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {statCards.map((stat) => (
           <Card key={stat.title} className="hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -219,43 +220,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Conversiones Recientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {conversionesRecientes.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
-                No hay conversiones recientes
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {conversionesRecientes.map((conversion) => (
-                  <div
-                    key={conversion.id}
-                    className="flex items-center justify-between pb-3 border-b border-border last:border-0"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium">
-                        {conversion.cliente_owner?.nombre || "Cliente"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        DNI Referido: {conversion.dni_referido}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(conversion.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
+      <div className="grid gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Top Clientes</CardTitle>
