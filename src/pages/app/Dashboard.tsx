@@ -14,6 +14,8 @@ const Dashboard = () => {
     premiosActivos: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [conversionesRecientes, setConversionesRecientes] = useState<any[]>([]);
+  const [topClientes, setTopClientes] = useState<any[]>([]);
 
   useEffect(() => {
     if (restaurante?.id) {
@@ -60,6 +62,55 @@ const Dashboard = () => {
         totalConversiones: conversionesCount || 0,
         premiosActivos: premiosCount || 0,
       });
+
+      // Fetch conversiones recientes
+      const { data: conversiones } = await supabase
+        .from("referidos")
+        .select(`
+          *,
+          cliente_owner:clientes!cliente_owner_id(nombre, dni_referido)
+        `)
+        .eq("restaurante_id", restaurante.id)
+        .eq("consumo_realizado", true)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      setConversionesRecientes(conversiones || []);
+
+      // Fetch top clientes (clientes con más referidos confirmados)
+      const { data: clientes } = await supabase
+        .from("clientes")
+        .select(`
+          id,
+          nombre,
+          codigo_referido
+        `)
+        .eq("restaurante_id", restaurante.id);
+
+      if (clientes) {
+        const clientesConConteo = await Promise.all(
+          clientes.map(async (cliente) => {
+            const { count } = await supabase
+              .from("referidos")
+              .select("*", { count: "exact", head: true })
+              .eq("restaurante_id", restaurante.id)
+              .eq("cliente_owner_id", cliente.id)
+              .eq("consumo_realizado", true);
+
+            return {
+              ...cliente,
+              conversiones: count || 0,
+            };
+          })
+        );
+
+        const topClientesData = clientesConConteo
+          .filter((c) => c.conversiones > 0)
+          .sort((a, b) => b.conversiones - a.conversiones)
+          .slice(0, 5);
+
+        setTopClientes(topClientesData);
+      }
     } catch (error) {
       console.error("Error fetching stats:", error);
       toast.error("Error al cargar estadísticas");
@@ -174,9 +225,34 @@ const Dashboard = () => {
             <CardTitle>Conversiones Recientes</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-center py-8">
-              No hay conversiones recientes
-            </p>
+            {conversionesRecientes.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                No hay conversiones recientes
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {conversionesRecientes.map((conversion) => (
+                  <div
+                    key={conversion.id}
+                    className="flex items-center justify-between pb-3 border-b border-border last:border-0"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium">
+                        {conversion.cliente_owner?.nombre || "Cliente"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        DNI Referido: {conversion.dni_referido}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(conversion.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -185,9 +261,40 @@ const Dashboard = () => {
             <CardTitle>Top Clientes</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground text-center py-8">
-              No hay datos disponibles
-            </p>
+            {topClientes.length === 0 ? (
+              <p className="text-muted-foreground text-center py-8">
+                No hay datos disponibles
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {topClientes.map((cliente, index) => (
+                  <div
+                    key={cliente.id}
+                    className="flex items-center justify-between pb-3 border-b border-border last:border-0"
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-medium">{cliente.nombre}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Código: {cliente.codigo_referido}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-primary">
+                        {cliente.conversiones}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        conversiones
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
