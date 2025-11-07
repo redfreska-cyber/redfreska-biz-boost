@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Utensils } from "lucide-react";
+import redFreskaLogo from "@/assets/redfreska-logo.png";
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -9,9 +9,7 @@ const Welcome = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       <div className="text-center space-y-8 px-4 max-w-2xl">
         <div className="flex justify-center mb-8">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-            <Utensils className="w-12 h-12 text-white" />
-          </div>
+          <img src={redFreskaLogo} alt="RedFreska Logo" className="w-32 h-32 object-contain" />
         </div>
         
         <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">

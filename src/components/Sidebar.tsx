@@ -7,10 +7,10 @@ import {
   Award, 
   CheckCircle, 
   UsersRound,
-  Settings,
-  Utensils
+  Settings
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import redFreskaLogo from "@/assets/redfreska-logo.png";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/app/dashboard" },
@@ -28,9 +28,7 @@ const Sidebar = () => {
     <aside className="w-64 bg-sidebar text-sidebar-foreground min-h-screen flex flex-col">
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center">
-            <Utensils className="w-6 h-6 text-primary" />
-          </div>
+          <img src={redFreskaLogo} alt="RedFreska Logo" className="w-10 h-10 object-contain" />
           <span className="text-xl font-bold">RedFreska</span>
         </div>
       </div>
