@@ -22,6 +22,7 @@ const Premios = () => {
   const [premios, setPremios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPremio, setSelectedPremio] = useState<any>(null);
 
   useEffect(() => {
     if (restaurante?.id) {
@@ -78,8 +79,12 @@ const Premios = () => {
 
       <PremioDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setSelectedPremio(null);
+        }}
         onSuccess={fetchPremios}
+        premio={selectedPremio}
       />
 
       <Card>
@@ -121,7 +126,14 @@ const Premios = () => {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedPremio(premio);
+                          setDialogOpen(true);
+                        }}
+                      >
                         Editar
                       </Button>
                     </TableCell>

@@ -13,17 +13,18 @@ interface PremioDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
+  premio?: any;
 }
 
-export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProps) => {
+export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDialogProps) => {
   const { restaurante } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    orden: 1,
-    descripcion: "",
-    umbral: 1,
-    tipo_premio: "cliente",
-    detalle_premio: "",
+    orden: premio?.orden || 1,
+    descripcion: premio?.descripcion || "",
+    umbral: premio?.umbral || 1,
+    tipo_premio: premio?.tipo_premio || "cliente",
+    detalle_premio: premio?.detalle_premio || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,24 +32,42 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProp
     setLoading(true);
 
     try {
-      const { error } = await supabase.from("premios").insert({
-        restaurante_id: restaurante?.id,
-        orden: formData.orden,
-        descripcion: formData.descripcion,
-        umbral: formData.umbral,
-        tipo_premio: formData.tipo_premio,
-        detalle_premio: formData.detalle_premio,
-        is_active: true,
-      });
+      if (premio) {
+        // Actualizar premio existente
+        const { error } = await supabase
+          .from("premios")
+          .update({
+            orden: formData.orden,
+            descripcion: formData.descripcion,
+            umbral: formData.umbral,
+            tipo_premio: formData.tipo_premio,
+            detalle_premio: formData.detalle_premio,
+          })
+          .eq("id", premio.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        toast.success("Premio actualizado exitosamente");
+      } else {
+        // Crear nuevo premio
+        const { error } = await supabase.from("premios").insert({
+          restaurante_id: restaurante?.id,
+          orden: formData.orden,
+          descripcion: formData.descripcion,
+          umbral: formData.umbral,
+          tipo_premio: formData.tipo_premio,
+          detalle_premio: formData.detalle_premio,
+          is_active: true,
+        });
 
-      toast.success("Premio creado exitosamente");
+        if (error) throw error;
+        toast.success("Premio creado exitosamente");
+      }
+
       onSuccess();
       onOpenChange(false);
-      setFormData({ orden: 1, descripcion: "", umbral: 1, tipo_premio: "", detalle_premio: "" });
+      setFormData({ orden: 1, descripcion: "", umbral: 1, tipo_premio: "cliente", detalle_premio: "" });
     } catch (error: any) {
-      toast.error(error.message || "Error al crear premio");
+      toast.error(error.message || `Error al ${premio ? "actualizar" : "crear"} premio`);
     } finally {
       setLoading(false);
     }
@@ -58,7 +77,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProp
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nuevo Premio</DialogTitle>
+          <DialogTitle>{premio ? "Editar Premio" : "Nuevo Premio"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -126,7 +145,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess }: PremioDialogProp
               Cancelar
             </Button>
             <Button type="submit" disabled={loading || !formData.tipo_premio}>
-              {loading ? "Creando..." : "Crear"}
+              {loading ? (premio ? "Actualizando..." : "Creando...") : (premio ? "Actualizar" : "Crear")}
             </Button>
           </div>
         </form>
