@@ -94,45 +94,65 @@ serve(async (req) => {
 
     console.log('Cliente created successfully:', cliente.id);
 
-    // Send WhatsApp message
+    // Send email with MailerSend
     try {
-      const twilioAccountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-      const twilioAuthToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-      const twilioWhatsAppNumber = Deno.env.get('TWILIO_WHATSAPP_NUMBER');
+      const mailersendApiKey = Deno.env.get('MAILERSEND_API_KEY');
 
-      if (twilioAccountSid && twilioAuthToken && twilioWhatsAppNumber) {
-        const mensaje = `¡Hola ${nombre}! 🎉\n\nBienvenido a ${restaurante.nombre}.\n\nTu código de referido es: *${codigoReferido}*\n\nComparte este código con tus amigos y gana premios increíbles cuando consuman en nuestro restaurante.\n\n¡Gracias por unirte!`;
+      if (mailersendApiKey && correo) {
+        const emailPayload = {
+          from: {
+            email: "noreply@trial-0r83ql3xvv3lzw1j.mlsender.net",
+            name: restaurante.nombre
+          },
+          to: [
+            {
+              email: correo,
+              name: nombre
+            }
+          ],
+          subject: `¡Bienvenido a ${restaurante.nombre}! 🎉`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h1 style="color: #333;">¡Hola ${nombre}!</h1>
+              <p style="color: #666; font-size: 16px; line-height: 1.5;">
+                Bienvenido a <strong>${restaurante.nombre}</strong>.
+              </p>
+              <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p style="color: #333; font-size: 14px; margin-bottom: 10px;">Tu código de referido es:</p>
+                <p style="color: #000; font-size: 24px; font-weight: bold; margin: 0;">${codigoReferido}</p>
+              </div>
+              <p style="color: #666; font-size: 16px; line-height: 1.5;">
+                Comparte este código con tus amigos y gana premios increíbles cuando consuman en nuestro restaurante.
+              </p>
+              <p style="color: #666; font-size: 16px; line-height: 1.5;">
+                ¡Gracias por unirte!
+              </p>
+            </div>
+          `,
+          text: `¡Hola ${nombre}! Bienvenido a ${restaurante.nombre}. Tu código de referido es: ${codigoReferido}. Comparte este código con tus amigos y gana premios increíbles cuando consuman en nuestro restaurante. ¡Gracias por unirte!`
+        };
 
-        const whatsappNumber = telefono.startsWith('+') ? telefono : `+51${telefono}`;
-
-        const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${twilioAccountSid}/Messages.json`;
-        const auth = btoa(`${twilioAccountSid}:${twilioAuthToken}`);
-
-        const twilioResponse = await fetch(twilioUrl, {
+        const mailersendResponse = await fetch('https://api.mailersend.com/v1/email', {
           method: 'POST',
           headers: {
-            'Authorization': `Basic ${auth}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Bearer ${mailersendApiKey}`,
+            'Content-Type': 'application/json',
           },
-          body: new URLSearchParams({
-            From: twilioWhatsAppNumber,
-            To: `whatsapp:${whatsappNumber}`,
-            Body: mensaje,
-          }),
+          body: JSON.stringify(emailPayload),
         });
 
-        if (!twilioResponse.ok) {
-          const errorText = await twilioResponse.text();
-          console.error('Twilio error:', errorText);
+        if (!mailersendResponse.ok) {
+          const errorText = await mailersendResponse.text();
+          console.error('MailerSend error:', errorText);
         } else {
-          console.log('WhatsApp message sent successfully');
+          console.log('Email sent successfully');
         }
       } else {
-        console.warn('Twilio credentials not configured, skipping WhatsApp message');
+        console.warn('MailerSend API key not configured or email not provided, skipping email');
       }
-    } catch (whatsappError) {
-      console.error('Error sending WhatsApp:', whatsappError);
-      // Don't fail the request if WhatsApp fails
+    } catch (emailError) {
+      console.error('Error sending email:', emailError);
+      // Don't fail the request if email fails
     }
 
     return new Response(
