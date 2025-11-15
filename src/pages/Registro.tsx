@@ -77,7 +77,7 @@ const Registro = () => {
       
       toast({
         title: "¡Registro exitoso!",
-        description: "Te hemos enviado tu código de referido por WhatsApp",
+        description: "Te hemos enviado tu código de referido por correo electrónico",
       });
     } catch (error) {
       console.error('Error:', error);
@@ -112,7 +112,7 @@ const Registro = () => {
             
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">
-                • Te hemos enviado tu código por WhatsApp
+                • Te hemos enviado tu código por correo electrónico
               </p>
               <p className="text-sm text-muted-foreground">
                 • Comparte tu código con amigos y familiares
