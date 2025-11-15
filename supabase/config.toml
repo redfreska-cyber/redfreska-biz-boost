@@ -1,1 +1,4 @@
 project_id = "bazphlbvqedefqujpimj"
+
+[functions.registro-cliente]
+verify_jwt = false
