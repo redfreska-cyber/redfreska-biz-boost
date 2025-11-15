@@ -99,7 +99,6 @@ const Configuracion = () => {
         ruc: data.ruc,
         telefono: data.telefono,
         direccion: data.direccion,
-        slug: (data as any).slug,
       });
 
       toast.success("Configuración actualizada");
