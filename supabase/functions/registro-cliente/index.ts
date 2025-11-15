@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.78.0";
+import { Resend } from "https://esm.sh/resend@4.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -94,22 +95,16 @@ serve(async (req) => {
 
     console.log('Cliente created successfully:', cliente.id);
 
-    // Send email with MailerSend
+    // Send email with Resend
     try {
-      const mailersendApiKey = Deno.env.get('MAILERSEND_API_KEY');
+      const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
-      if (mailersendApiKey && correo) {
-        const emailPayload = {
-          from: {
-            email: "noreply@trial-0r83ql3xvv3lzw1j.mlsender.net",
-            name: restaurante.nombre
-          },
-          to: [
-            {
-              email: correo,
-              name: nombre
-            }
-          ],
+      if (resendApiKey && correo) {
+        const resend = new Resend(resendApiKey);
+
+        const { data: emailData, error: emailError } = await resend.emails.send({
+          from: "RedFreska <onboarding@resend.dev>",
+          to: [correo],
           subject: `¡Bienvenido a ${restaurante.nombre}! 🎉`,
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -129,26 +124,15 @@ serve(async (req) => {
               </p>
             </div>
           `,
-          text: `¡Hola ${nombre}! Bienvenido a ${restaurante.nombre}. Tu código de referido es: ${codigoReferido}. Comparte este código con tus amigos y gana premios increíbles cuando consuman en nuestro restaurante. ¡Gracias por unirte!`
-        };
-
-        const mailersendResponse = await fetch('https://api.mailersend.com/v1/email', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${mailersendApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(emailPayload),
         });
 
-        if (!mailersendResponse.ok) {
-          const errorText = await mailersendResponse.text();
-          console.error('MailerSend error:', errorText);
+        if (emailError) {
+          console.error('Resend error:', emailError);
         } else {
-          console.log('Email sent successfully');
+          console.log('Email sent successfully:', emailData);
         }
       } else {
-        console.warn('MailerSend API key not configured or email not provided, skipping email');
+        console.warn('Resend API key not configured or email not provided, skipping email');
       }
     } catch (emailError) {
       console.error('Error sending email:', emailError);
