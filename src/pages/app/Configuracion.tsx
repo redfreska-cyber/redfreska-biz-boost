@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { QRCodeSVG } from "qrcode.react";
+import { Copy, Download } from "lucide-react";
 
 const Configuracion = () => {
   const { restaurante, setRestaurante } = useAuth();
@@ -17,6 +19,7 @@ const Configuracion = () => {
     telefono: "",
     direccion: "",
     correo: "",
+    slug: "",
   });
 
   useEffect(() => {
@@ -27,9 +30,47 @@ const Configuracion = () => {
         telefono: restaurante.telefono || "",
         direccion: restaurante.direccion || "",
         correo: restaurante.correo || "",
+        slug: (restaurante as any).slug || "",
       });
     }
   }, [restaurante]);
+
+  const registrationUrl = formData.slug 
+    ? `${window.location.origin}/registro/${formData.slug}`
+    : "";
+
+  const handleCopyUrl = () => {
+    if (registrationUrl) {
+      navigator.clipboard.writeText(registrationUrl);
+      toast.success("Link copiado al portapapeles");
+    }
+  };
+
+  const handleDownloadQR = () => {
+    const svg = document.getElementById("qr-code");
+    if (!svg) return;
+    
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx?.drawImage(img, 0, 0);
+      const pngFile = canvas.toDataURL("image/png");
+      
+      const downloadLink = document.createElement("a");
+      downloadLink.download = `qr-registro-${formData.slug}.png`;
+      downloadLink.href = pngFile;
+      downloadLink.click();
+      
+      toast.success("QR descargado");
+    };
+    
+    img.src = "data:image/svg+xml;base64," + btoa(svgData);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +84,7 @@ const Configuracion = () => {
           ruc: formData.ruc,
           telefono: formData.telefono,
           direccion: formData.direccion,
+          slug: formData.slug || null,
         })
         .eq("id", restaurante?.id)
         .select()
@@ -141,6 +183,80 @@ const Configuracion = () => {
               {loading ? "Guardando..." : "Guardar Cambios"}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Portal de Registro Público</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="slug">
+              URL personalizada (slug)
+              <span className="text-xs text-muted-foreground ml-2">
+                Solo letras, números y guiones
+              </span>
+            </Label>
+            <Input
+              id="slug"
+              value={formData.slug}
+              onChange={(e) => {
+                const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                setFormData({ ...formData, slug: value });
+              }}
+              placeholder="mi-restaurante"
+            />
+            {formData.slug && (
+              <p className="text-xs text-muted-foreground">
+                Link de registro: {registrationUrl}
+              </p>
+            )}
+          </div>
+
+          {formData.slug && registrationUrl && (
+            <div className="space-y-4 pt-4 border-t">
+              <div className="flex flex-col items-center gap-4">
+                <div className="bg-white p-4 rounded-lg border">
+                  <QRCodeSVG
+                    id="qr-code"
+                    value={registrationUrl}
+                    size={200}
+                    level="H"
+                    includeMargin
+                  />
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCopyUrl}
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copiar Link
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleDownloadQR}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Descargar QR
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-muted p-4 rounded-lg space-y-2">
+                <p className="text-sm font-medium">¿Cómo usar el QR?</p>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Imprime el código QR y colócalo en tu restaurante</li>
+                  <li>• Los clientes pueden escanearlo para registrarse</li>
+                  <li>• Recibirán su código de referido por WhatsApp</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
