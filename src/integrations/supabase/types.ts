@@ -229,6 +229,7 @@ export type Database = {
           nombre: string
           plan_actual: string | null
           ruc: string | null
+          slug: string | null
           telefono: string | null
         }
         Insert: {
@@ -244,6 +245,7 @@ export type Database = {
           nombre: string
           plan_actual?: string | null
           ruc?: string | null
+          slug?: string | null
           telefono?: string | null
         }
         Update: {
@@ -259,6 +261,7 @@ export type Database = {
           nombre?: string
           plan_actual?: string | null
           ruc?: string | null
+          slug?: string | null
           telefono?: string | null
         }
         Relationships: []

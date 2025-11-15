@@ -10,6 +10,7 @@ import Welcome from "./pages/Welcome";
 import Access from "./pages/Access";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import Registro from "./pages/Registro";
 import Dashboard from "./pages/app/Dashboard";
 import Clientes from "./pages/app/Clientes";
 import Referidos from "./pages/app/Referidos";
@@ -32,9 +33,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/welcome" replace />} />
             <Route path="/welcome" element={<Welcome />} />
-            <Route path="/access" element={<Access />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
+        <Route path="/access" element={<Access />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/registro/:slug" element={<Registro />} />
             
             <Route path="/app/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
             <Route path="/app/clientes" element={<DashboardLayout><Clientes /></DashboardLayout>} />
