@@ -102,14 +102,19 @@ serve(async (req) => {
     if (premio_id) {
       const { data: premio } = await supabaseAdmin
         .from('premios')
-        .select('descripcion, detalle_premio')
+        .select('descripcion, detalle_premio, imagen_url')
         .eq('id', premio_id)
         .single();
       
       if (premio) {
+        const imagenHtml = premio.imagen_url 
+          ? `<img src="${premio.imagen_url}" alt="${premio.descripcion}" style="width: 100%; max-width: 300px; height: auto; border-radius: 8px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;" />`
+          : '';
+        
         premioInfo = `
           <div style="background-color: #e8f5e9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4caf50;">
             <h3 style="color: #2e7d32; margin-top: 0;">🎁 ¡Has elegido un premio increíble!</h3>
+            ${imagenHtml}
             <p style="color: #333; font-size: 16px; margin: 10px 0;">
               <strong>${premio.descripcion}</strong>
             </p>
