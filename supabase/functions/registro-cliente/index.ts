@@ -102,13 +102,17 @@ serve(async (req) => {
     if (premio_id) {
       const { data: premio } = await supabaseAdmin
         .from('premios')
-        .select('descripcion, detalle_premio, imagen_url')
+        .select('descripcion, detalle_premio, imagen_url, umbral, monto_minimo_consumo')
         .eq('id', premio_id)
         .single();
       
       if (premio) {
         const imagenHtml = premio.imagen_url 
           ? `<img src="${premio.imagen_url}" alt="${premio.descripcion}" style="width: 100%; max-width: 300px; height: auto; border-radius: 8px; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;" />`
+          : '';
+        
+        const montoMinimo = premio.monto_minimo_consumo 
+          ? `<p style="color: #555; font-size: 14px; margin: 5px 0;">💰 <strong>Monto mínimo por consumo:</strong> S/ ${premio.monto_minimo_consumo}</p>` 
           : '';
         
         premioInfo = `
@@ -119,8 +123,17 @@ serve(async (req) => {
               <strong>${premio.descripcion}</strong>
             </p>
             ${premio.detalle_premio ? `<p style="color: #666; font-size: 14px; margin: 5px 0;">${premio.detalle_premio}</p>` : ''}
-            <p style="color: #555; font-size: 14px; margin-top: 10px;">
-              ¡Comparte tu código para alcanzar este premio más rápido!
+            
+            <div style="background-color: #fff; padding: 15px; border-radius: 6px; margin: 15px 0;">
+              <p style="color: #555; font-size: 14px; margin: 5px 0;">👥 <strong>Referidos necesarios:</strong> ${premio.umbral} personas</p>
+              ${montoMinimo}
+            </div>
+            
+            <p style="color: #2e7d32; font-size: 15px; font-weight: bold; margin: 15px 0;">
+              ✨ ¡Estás a solo ${premio.umbral} referidos de alcanzar tu premio!
+            </p>
+            <p style="color: #555; font-size: 14px; margin: 5px 0;">
+              Comparte tu código con amigos y familiares. Cada vez que consuman en ${restaurante.nombre}, ¡estarás más cerca de tu objetivo!
             </p>
           </div>
         `;
