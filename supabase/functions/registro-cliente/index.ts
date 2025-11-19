@@ -97,6 +97,31 @@ serve(async (req) => {
 
     console.log('Cliente created successfully:', cliente.id);
 
+    // Get premio details if premio_id was provided
+    let premioInfo = '';
+    if (premio_id) {
+      const { data: premio } = await supabaseAdmin
+        .from('premios')
+        .select('descripcion, detalle_premio')
+        .eq('id', premio_id)
+        .single();
+      
+      if (premio) {
+        premioInfo = `
+          <div style="background-color: #e8f5e9; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4caf50;">
+            <h3 style="color: #2e7d32; margin-top: 0;">🎁 ¡Has elegido un premio increíble!</h3>
+            <p style="color: #333; font-size: 16px; margin: 10px 0;">
+              <strong>${premio.descripcion}</strong>
+            </p>
+            ${premio.detalle_premio ? `<p style="color: #666; font-size: 14px; margin: 5px 0;">${premio.detalle_premio}</p>` : ''}
+            <p style="color: #555; font-size: 14px; margin-top: 10px;">
+              ¡Comparte tu código para alcanzar este premio más rápido!
+            </p>
+          </div>
+        `;
+      }
+    }
+
     // Send email with Resend
     try {
       const resendApiKey = Deno.env.get('RESEND_API_KEY');
@@ -109,20 +134,40 @@ serve(async (req) => {
           to: [correo],
           subject: `¡Bienvenido a ${restaurante.nombre}! 🎉`,
           html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h1 style="color: #333;">¡Hola ${nombre}!</h1>
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+              <h1 style="color: #333; margin-bottom: 10px;">¡Hola ${nombre}!</h1>
               <p style="color: #666; font-size: 16px; line-height: 1.5;">
-                Bienvenido a <strong>${restaurante.nombre}</strong>.
+                Bienvenido a <strong>${restaurante.nombre}</strong>. ¡Estamos felices de tenerte con nosotros!
               </p>
+              
+              ${premioInfo}
+              
               <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <p style="color: #333; font-size: 14px; margin-bottom: 10px;">Tu código de referido es:</p>
-                <p style="color: #000; font-size: 24px; font-weight: bold; margin: 0;">${codigoReferido}</p>
+                <p style="color: #000; font-size: 24px; font-weight: bold; margin: 0; letter-spacing: 2px;">${codigoReferido}</p>
               </div>
-              <p style="color: #666; font-size: 16px; line-height: 1.5;">
-                Comparte este código con tus amigos y gana premios increíbles cuando consuman en nuestro restaurante.
+              
+              <div style="background-color: #fff3e0; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ff9800;">
+                <h3 style="color: #e65100; margin-top: 0;">💪 ¡Comparte y gana!</h3>
+                <p style="color: #666; font-size: 16px; line-height: 1.5; margin: 10px 0;">
+                  Cada vez que un amigo use tu código de referido y consuma en nuestro restaurante, 
+                  <strong>¡estarás más cerca de ganar increíbles premios!</strong>
+                </p>
+                <ul style="color: #666; font-size: 15px; line-height: 1.8; margin: 15px 0;">
+                  <li>Comparte tu código con amigos y familiares</li>
+                  <li>Ellos disfrutan en ${restaurante.nombre}</li>
+                  <li>Tú acumulas conversiones y ganas premios</li>
+                </ul>
+                <p style="color: #666; font-size: 16px; line-height: 1.5; margin: 15px 0;">
+                  <strong style="color: #e65100;">¿Qué esperas?</strong> Entre más compartas, más rápido alcanzarás tus premios.
+                </p>
+              </div>
+              
+              <p style="color: #666; font-size: 16px; line-height: 1.5; margin-top: 30px;">
+                ¡Gracias por unirte a nuestra comunidad!
               </p>
-              <p style="color: #666; font-size: 16px; line-height: 1.5;">
-                ¡Gracias por unirte!
+              <p style="color: #999; font-size: 14px; margin-top: 20px;">
+                El equipo de ${restaurante.nombre}
               </p>
             </div>
           `,
