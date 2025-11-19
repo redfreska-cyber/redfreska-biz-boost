@@ -105,7 +105,7 @@ serve(async (req) => {
         const resend = new Resend(resendApiKey);
 
         const { data: emailData, error: emailError } = await resend.emails.send({
-          from: "RedFreska <noreply@redfreska.com>",
+          from: "RedFreska <onboarding@resend.dev>",
           to: [correo],
           subject: `¡Bienvenido a ${restaurante.nombre}! 🎉`,
           html: `
