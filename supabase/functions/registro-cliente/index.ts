@@ -70,7 +70,7 @@ serve(async (req) => {
     }
 
     // Generate unique referral code
-    const codigoReferido = `REF-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    const codigoReferido = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     // Insert new cliente
     const { data: cliente, error: clienteError } = await supabaseAdmin
