@@ -81,10 +81,10 @@ const Validaciones = () => {
 
       if (validacionesError) throw validacionesError;
 
-      // 2) Traer todos los clientes del restaurante
+      // 2) Traer todos los clientes del restaurante con su premio seleccionado
       const { data: clientesData, error: clientesError } = await supabase
         .from("clientes")
-        .select("id, nombre, restaurante_id")
+        .select("id, nombre, restaurante_id, premio_id")
         .eq("restaurante_id", restaurante?.id);
 
       if (clientesError) throw clientesError;
@@ -116,23 +116,27 @@ const Validaciones = () => {
         referidosCounts[ref.cliente_owner_id] = (referidosCounts[ref.cliente_owner_id] || 0) + 1;
       });
 
-      // 5) Crear nuevas validaciones si alcanzan el umbral y no existen
+      // 5) Crear validaciones solo para el premio que el cliente seleccionó al registrarse
       const newValidaciones: any[] = [];
       for (const cliente of clientesData || []) {
+        // Solo procesar si el cliente tiene un premio seleccionado
+        if (!cliente.premio_id) continue;
+        
         const count = referidosCounts[cliente.id] || 0;
-        for (const premio of premiosData || []) {
-          if (count >= premio.umbral) {
-            const exists = validacionesData?.some(
-              (v) => v.cliente_id === cliente.id && (v as any).premio_id === premio.id
-            );
-            if (!exists) {
-              newValidaciones.push({
-                cliente_id: cliente.id,
-                premio_id: premio.id,
-                conversiones_realizadas: count,
-                validado: false,
-              });
-            }
+        const premioSeleccionado = premiosData?.find(p => p.id === cliente.premio_id);
+        
+        // Solo crear validación si alcanzó el umbral de SU premio seleccionado
+        if (premioSeleccionado && count >= premioSeleccionado.umbral) {
+          const exists = validacionesData?.some(
+            (v) => v.cliente_id === cliente.id && (v as any).premio_id === premioSeleccionado.id
+          );
+          if (!exists) {
+            newValidaciones.push({
+              cliente_id: cliente.id,
+              premio_id: premioSeleccionado.id,
+              conversiones_realizadas: count,
+              validado: false,
+            });
           }
         }
       }
@@ -166,11 +170,9 @@ const Validaciones = () => {
           filtered.find((x) => x.cliente_id === cliente.id && !x.validado) ||
           filtered.find((x) => x.cliente_id === cliente.id);
 
-        // Premio objetivo: el de la validación si existe; si no, el siguiente premio por alcanzar
-        const premioTarget =
-          v?.premio ||
-          (premiosData || []).find((p) => p.umbral >= count) ||
-          (premiosData || [])[Math.max(0, (premiosData?.length || 1) - 1)];
+        // Premio objetivo: usar el premio que el cliente seleccionó al registrarse
+        const premioSeleccionado = premiosData?.find(p => p.id === cliente.premio_id);
+        const premioTarget = v?.premio || premioSeleccionado;
 
         return {
           ...(v || {}),
