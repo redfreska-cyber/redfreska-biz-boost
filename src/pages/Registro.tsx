@@ -64,7 +64,7 @@ const Registro = () => {
 
     try {
       // Validate inputs
-      if (!formData.nombre || !formData.telefono) {
+      if (!formData.nombre || !formData.telefono || !formData.correo || !formData.premio_id) {
         toast({
           title: "Error",
           description: "Por favor completa todos los campos requeridos",
@@ -81,8 +81,8 @@ const Registro = () => {
           nombre: formData.nombre.trim(),
           telefono: formData.telefono.trim(),
           dni: formData.dni.trim() || null,
-          correo: formData.correo.trim() || null,
-          premio_id: formData.premio_id || null,
+          correo: formData.correo.trim(),
+          premio_id: formData.premio_id,
         },
       });
 
@@ -226,23 +226,25 @@ const Registro = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="correo">Correo electrónico (opcional)</Label>
+              <Label htmlFor="correo">Correo electrónico *</Label>
               <Input
                 id="correo"
                 type="email"
                 placeholder="Ej: juan@email.com"
                 value={formData.correo}
                 onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
+                required
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="premio">Premio a Elegir (Opcional)</Label>
+              <Label htmlFor="premio">Premio a Elegir *</Label>
               <Select
                 value={formData.premio_id}
                 onValueChange={(value) => setFormData({ ...formData, premio_id: value })}
                 disabled={loading || premios.length === 0}
+                required
               >
                 <SelectTrigger>
                   <SelectValue placeholder={premios.length === 0 ? "No hay premios disponibles" : "Selecciona un premio"} />
