@@ -129,6 +129,7 @@ export type Database = {
           descripcion: string
           detalle_premio: string | null
           id: string
+          imagen_url: string | null
           is_active: boolean
           monto_minimo_consumo: number | null
           orden: number
@@ -141,6 +142,7 @@ export type Database = {
           descripcion: string
           detalle_premio?: string | null
           id?: string
+          imagen_url?: string | null
           is_active?: boolean
           monto_minimo_consumo?: number | null
           orden?: number
@@ -153,6 +155,7 @@ export type Database = {
           descripcion?: string
           detalle_premio?: string | null
           id?: string
+          imagen_url?: string | null
           is_active?: boolean
           monto_minimo_consumo?: number | null
           orden?: number
