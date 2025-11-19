@@ -64,7 +64,7 @@ const Registro = () => {
 
     try {
       // Validate inputs
-      if (!formData.nombre || !formData.telefono || !formData.correo || !formData.premio_id) {
+      if (!formData.nombre || !formData.telefono || !formData.dni || !formData.correo || !formData.premio_id) {
         toast({
           title: "Error",
           description: "Por favor completa todos los campos requeridos",
@@ -80,7 +80,7 @@ const Registro = () => {
           slug,
           nombre: formData.nombre.trim(),
           telefono: formData.telefono.trim(),
-          dni: formData.dni.trim() || null,
+          dni: formData.dni.trim(),
           correo: formData.correo.trim(),
           premio_id: formData.premio_id,
         },
@@ -214,13 +214,14 @@ const Registro = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dni">DNI (opcional)</Label>
+              <Label htmlFor="dni">DNI *</Label>
               <Input
                 id="dni"
                 type="text"
                 placeholder="Ej: 12345678"
                 value={formData.dni}
                 onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
+                required
                 disabled={loading}
               />
             </div>
