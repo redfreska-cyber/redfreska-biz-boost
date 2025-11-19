@@ -237,28 +237,32 @@ const Registro = () => {
               />
             </div>
 
-            {premios.length > 0 && (
-              <div className="space-y-2">
-                <Label htmlFor="premio">Premio a Elegir (Opcional)</Label>
-                <Select
-                  value={formData.premio_id}
-                  onValueChange={(value) => setFormData({ ...formData, premio_id: value })}
-                  disabled={loading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un premio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {premios.map((premio) => (
+            <div className="space-y-2">
+              <Label htmlFor="premio">Premio a Elegir (Opcional)</Label>
+              <Select
+                value={formData.premio_id}
+                onValueChange={(value) => setFormData({ ...formData, premio_id: value })}
+                disabled={loading || premios.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={premios.length === 0 ? "No hay premios disponibles" : "Selecciona un premio"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {premios.length > 0 ? (
+                    premios.map((premio) => (
                       <SelectItem key={premio.id} value={premio.id}>
                         {premio.descripcion} - {premio.umbral} referidos
                         {premio.monto_minimo_consumo && ` (Min: S/ ${parseFloat(premio.monto_minimo_consumo).toFixed(2)})`}
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+                    ))
+                  ) : (
+                    <SelectItem value="no-premios" disabled>
+                      No hay premios disponibles
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
