@@ -120,6 +120,7 @@ export type Database = {
           detalle_premio: string | null
           id: string
           is_active: boolean
+          monto_minimo_consumo: number | null
           orden: number
           restaurante_id: string
           tipo_premio: string
@@ -131,6 +132,7 @@ export type Database = {
           detalle_premio?: string | null
           id?: string
           is_active?: boolean
+          monto_minimo_consumo?: number | null
           orden?: number
           restaurante_id: string
           tipo_premio: string
@@ -142,6 +144,7 @@ export type Database = {
           detalle_premio?: string | null
           id?: string
           is_active?: boolean
+          monto_minimo_consumo?: number | null
           orden?: number
           restaurante_id?: string
           tipo_premio?: string

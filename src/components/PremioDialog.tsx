@@ -25,6 +25,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDi
     umbral: premio?.umbral || 1,
     tipo_premio: premio?.tipo_premio || "cliente",
     detalle_premio: premio?.detalle_premio || "",
+    monto_minimo_consumo: premio?.monto_minimo_consumo || "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,6 +39,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDi
         umbral: formData.tipo_premio === "cliente" ? formData.umbral : null,
         tipo_premio: formData.tipo_premio,
         detalle_premio: formData.detalle_premio,
+        monto_minimo_consumo: formData.monto_minimo_consumo || null,
       };
 
       if (premio) {
@@ -63,7 +65,7 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDi
 
       onSuccess();
       onOpenChange(false);
-      setFormData({ orden: 1, descripcion: "", umbral: 1, tipo_premio: "cliente", detalle_premio: "" });
+      setFormData({ orden: 1, descripcion: "", umbral: 1, tipo_premio: "cliente", detalle_premio: "", monto_minimo_consumo: "" });
     } catch (error: any) {
       toast.error(error.message || `Error al ${premio ? "actualizar" : "crear"} premio`);
     } finally {
@@ -129,6 +131,19 @@ export const PremioDialog = ({ open, onOpenChange, onSuccess, premio }: PremioDi
               />
             </div>
           )}
+
+          <div>
+            <Label htmlFor="monto_minimo_consumo">Monto Mínimo de Consumo (S/)</Label>
+            <Input
+              id="monto_minimo_consumo"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.monto_minimo_consumo}
+              onChange={(e) => setFormData({ ...formData, monto_minimo_consumo: e.target.value })}
+              placeholder="0.00"
+            />
+          </div>
 
           <div>
             <Label htmlFor="detalle_premio">Detalle del Premio</Label>
