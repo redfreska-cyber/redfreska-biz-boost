@@ -119,6 +119,7 @@ const Premios = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Imagen</TableHead>
                   <TableHead>Orden</TableHead>
                   <TableHead>Descripción</TableHead>
                   <TableHead>Umbral</TableHead>
@@ -131,6 +132,19 @@ const Premios = () => {
               <TableBody>
                 {premios.map((premio) => (
                   <TableRow key={premio.id}>
+                    <TableCell>
+                      {premio.imagen_url ? (
+                        <img 
+                          src={premio.imagen_url} 
+                          alt={premio.descripcion}
+                          className="w-16 h-16 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center text-muted-foreground text-xs">
+                          Sin imagen
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell>{premio.orden}</TableCell>
                     <TableCell>{premio.descripcion}</TableCell>
                     <TableCell>{premio.umbral ? `${premio.umbral} referidos` : 'N/A'}</TableCell>
