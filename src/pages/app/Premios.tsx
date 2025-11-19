@@ -122,6 +122,7 @@ const Premios = () => {
                   <TableHead>Orden</TableHead>
                   <TableHead>Descripción</TableHead>
                   <TableHead>Umbral</TableHead>
+                  <TableHead>Monto Mínimo (S/)</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Activo</TableHead>
                   <TableHead>Acciones</TableHead>
@@ -133,6 +134,9 @@ const Premios = () => {
                     <TableCell>{premio.orden}</TableCell>
                     <TableCell>{premio.descripcion}</TableCell>
                     <TableCell>{premio.umbral ? `${premio.umbral} referidos` : 'N/A'}</TableCell>
+                    <TableCell>
+                      {premio.monto_minimo_consumo ? `S/ ${parseFloat(premio.monto_minimo_consumo).toFixed(2)}` : 'N/A'}
+                    </TableCell>
                     <TableCell>
                       <Badge>{premio.tipo_premio}</Badge>
                     </TableCell>
