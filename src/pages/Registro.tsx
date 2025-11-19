@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,12 +17,46 @@ const Registro = () => {
   const [loading, setLoading] = useState(false);
   const [registroExitoso, setRegistroExitoso] = useState(false);
   const [codigoReferido, setCodigoReferido] = useState("");
+  const [premios, setPremios] = useState<any[]>([]);
+  const [restauranteId, setRestauranteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     nombre: "",
     telefono: "",
     dni: "",
     correo: "",
+    premio_id: "",
   });
+
+  useEffect(() => {
+    if (slug) {
+      fetchRestauranteAndPremios();
+    }
+  }, [slug]);
+
+  const fetchRestauranteAndPremios = async () => {
+    // Get restaurante by slug
+    const { data: restaurante } = await supabase
+      .from("restaurantes")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (restaurante) {
+      setRestauranteId(restaurante.id);
+      
+      // Fetch active premios
+      const { data: premiosData } = await supabase
+        .from("premios")
+        .select("*")
+        .eq("restaurante_id", restaurante.id)
+        .eq("is_active", true)
+        .order("orden", { ascending: true });
+
+      if (premiosData) {
+        setPremios(premiosData);
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +82,7 @@ const Registro = () => {
           telefono: formData.telefono.trim(),
           dni: formData.dni.trim() || null,
           correo: formData.correo.trim() || null,
+          premio_id: formData.premio_id || null,
         },
       });
 
@@ -200,6 +236,29 @@ const Registro = () => {
                 disabled={loading}
               />
             </div>
+
+            {premios.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="premio">Premio a Elegir (Opcional)</Label>
+                <Select
+                  value={formData.premio_id}
+                  onValueChange={(value) => setFormData({ ...formData, premio_id: value })}
+                  disabled={loading}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona un premio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {premios.map((premio) => (
+                      <SelectItem key={premio.id} value={premio.id}>
+                        {premio.descripcion} - {premio.umbral} referidos
+                        {premio.monto_minimo_consumo && ` (Min: S/ ${parseFloat(premio.monto_minimo_consumo).toFixed(2)})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (

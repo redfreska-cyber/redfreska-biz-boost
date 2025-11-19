@@ -13,6 +13,7 @@ interface RegistroClienteRequest {
   telefono: string;
   dni?: string;
   correo?: string;
+  premio_id?: string;
 }
 
 serve(async (req) => {
@@ -22,9 +23,9 @@ serve(async (req) => {
   }
 
   try {
-    const { slug, nombre, telefono, dni, correo }: RegistroClienteRequest = await req.json();
+    const { slug, nombre, telefono, dni, correo, premio_id }: RegistroClienteRequest = await req.json();
 
-    console.log('Registro cliente request:', { slug, nombre, telefono });
+    console.log('Registro cliente request:', { slug, nombre, telefono, premio_id });
 
     // Validate inputs
     if (!slug || !nombre || !telefono) {
@@ -80,7 +81,8 @@ serve(async (req) => {
         telefono,
         correo: correo || null,
         codigo_referido: codigoReferido,
-        estado: 'activo'
+        estado: 'activo',
+        premio_id: premio_id || null
       })
       .select()
       .single();

@@ -22,6 +22,7 @@ export type Database = {
           fecha_registro: string
           id: string
           nombre: string
+          premio_id: string | null
           restaurante_id: string
           telefono: string | null
         }
@@ -32,6 +33,7 @@ export type Database = {
           fecha_registro?: string
           id?: string
           nombre: string
+          premio_id?: string | null
           restaurante_id: string
           telefono?: string | null
         }
@@ -42,10 +44,18 @@ export type Database = {
           fecha_registro?: string
           id?: string
           nombre?: string
+          premio_id?: string | null
           restaurante_id?: string
           telefono?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "clientes_premio_id_fkey"
+            columns: ["premio_id"]
+            isOneToOne: false
+            referencedRelation: "premios"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clientes_restaurante_id_fkey"
             columns: ["restaurante_id"]

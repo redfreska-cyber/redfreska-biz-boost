@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -16,11 +17,32 @@ const ClienteDialog = ({ onClienteCreated }: ClienteDialogProps) => {
   const { restaurante } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [premios, setPremios] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     nombre: "",
     correo: "",
     telefono: "",
+    premio_id: "",
   });
+
+  useEffect(() => {
+    if (open && restaurante?.id) {
+      fetchPremios();
+    }
+  }, [open, restaurante?.id]);
+
+  const fetchPremios = async () => {
+    const { data, error } = await supabase
+      .from("premios")
+      .select("*")
+      .eq("restaurante_id", restaurante?.id)
+      .eq("is_active", true)
+      .order("orden", { ascending: true });
+
+    if (!error && data) {
+      setPremios(data);
+    }
+  };
 
   const generateReferralCode = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -40,12 +62,13 @@ const ClienteDialog = ({ onClienteCreated }: ClienteDialogProps) => {
           codigo_referido: generateReferralCode(),
           restaurante_id: restaurante?.id,
           estado: "activo",
+          premio_id: formData.premio_id || null,
         });
 
       if (error) throw error;
 
       toast.success("Cliente registrado exitosamente");
-      setFormData({ nombre: "", correo: "", telefono: "" });
+      setFormData({ nombre: "", correo: "", telefono: "", premio_id: "" });
       setOpen(false);
       onClienteCreated?.();
     } catch (error: any) {
@@ -102,6 +125,28 @@ const ClienteDialog = ({ onClienteCreated }: ClienteDialogProps) => {
                 setFormData({ ...formData, telefono: e.target.value })
               }
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="premio">Premio a Elegir (Opcional)</Label>
+            <Select
+              value={formData.premio_id}
+              onValueChange={(value) =>
+                setFormData({ ...formData, premio_id: value })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un premio" />
+              </SelectTrigger>
+              <SelectContent>
+                {premios.map((premio) => (
+                  <SelectItem key={premio.id} value={premio.id}>
+                    {premio.descripcion} - {premio.umbral} referidos
+                    {premio.monto_minimo_consumo && ` (Min: S/ ${parseFloat(premio.monto_minimo_consumo).toFixed(2)})`}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex gap-2 justify-end">
