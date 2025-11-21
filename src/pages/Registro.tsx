@@ -15,10 +15,12 @@ const Registro = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [loadingRestaurante, setLoadingRestaurante] = useState(true);
   const [registroExitoso, setRegistroExitoso] = useState(false);
   const [codigoReferido, setCodigoReferido] = useState("");
   const [premios, setPremios] = useState<any[]>([]);
   const [restauranteId, setRestauranteId] = useState<string | null>(null);
+  const [restauranteNoEncontrado, setRestauranteNoEncontrado] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     telefono: "",
@@ -34,14 +36,21 @@ const Registro = () => {
   }, [slug]);
 
   const fetchRestauranteAndPremios = async () => {
-    // Get restaurante by slug
-    const { data: restaurante } = await supabase
-      .from("restaurantes")
-      .select("id")
-      .eq("slug", slug)
-      .maybeSingle();
+    try {
+      setLoadingRestaurante(true);
+      // Get restaurante by slug
+      const { data: restaurante, error } = await supabase
+        .from("restaurantes")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
 
-    if (restaurante) {
+      if (error || !restaurante) {
+        setRestauranteNoEncontrado(true);
+        setLoadingRestaurante(false);
+        return;
+      }
+
       setRestauranteId(restaurante.id);
       
       // Fetch active premios
@@ -55,6 +64,11 @@ const Registro = () => {
       if (premiosData) {
         setPremios(premiosData);
       }
+    } catch (error) {
+      console.error('Error fetching restaurante:', error);
+      setRestauranteNoEncontrado(true);
+    } finally {
+      setLoadingRestaurante(false);
     }
   };
 
@@ -126,6 +140,44 @@ const Registro = () => {
       setLoading(false);
     }
   };
+
+  if (loadingRestaurante) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-muted-foreground">Cargando formulario de registro...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (restauranteNoEncontrado) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Restaurante no encontrado</CardTitle>
+            <CardDescription>
+              El enlace de registro no es válido o ha expirado
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => navigate('/')} 
+              className="w-full"
+            >
+              Ir al inicio
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (registroExitoso) {
     return (
