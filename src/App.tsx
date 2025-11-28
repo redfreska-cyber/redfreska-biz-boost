@@ -19,6 +19,7 @@ import Premios from "./pages/app/Premios";
 import Validaciones from "./pages/app/Validaciones";
 import Usuarios from "./pages/app/Usuarios";
 import Configuracion from "./pages/app/Configuracion";
+import SuperAdmin from "./pages/app/SuperAdmin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/app/validaciones" element={<DashboardLayout><Validaciones /></DashboardLayout>} />
             <Route path="/app/usuarios" element={<DashboardLayout><Usuarios /></DashboardLayout>} />
             <Route path="/app/configuracion" element={<DashboardLayout><Configuracion /></DashboardLayout>} />
+            <Route path="/app/superadmin" element={<DashboardLayout><SuperAdmin /></DashboardLayout>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

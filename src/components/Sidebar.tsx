@@ -7,10 +7,12 @@ import {
   Award, 
   CheckCircle, 
   UsersRound,
-  Settings
+  Settings,
+  Shield
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import redFreskaLogo from "@/assets/redfreska-logo.png";
+import { useAuth } from "@/contexts/AuthContext";
 
 const menuItems = [
   { title: "Dashboard", icon: LayoutDashboard, url: "/app/dashboard" },
@@ -24,6 +26,8 @@ const menuItems = [
 ];
 
 const Sidebar = () => {
+  const { userRole } = useAuth();
+
   return (
     <aside className="w-64 bg-sidebar text-sidebar-foreground min-h-screen flex flex-col">
       <div className="p-6 border-b border-sidebar-border">
@@ -34,6 +38,23 @@ const Sidebar = () => {
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
+        {userRole?.role === "superadmin" && (
+          <NavLink
+            to="/app/superadmin"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors",
+                isActive
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80"
+              )
+            }
+          >
+            <Shield className="w-5 h-5" />
+            <span>SuperAdmin</span>
+          </NavLink>
+        )}
+
         {menuItems.map((item) => (
           <NavLink
             key={item.url}
