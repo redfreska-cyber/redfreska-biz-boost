@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, Award, TrendingUp, Eye } from "lucide-react";
+import { Building2, Users, Award, TrendingUp, Eye, Download, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import RestauranteDetailDialog from "@/components/RestauranteDetailDialog";
+import SuperAdminFilters from "@/components/SuperAdminFilters";
 
 interface RestauranteStats {
   id: string;
@@ -31,6 +33,13 @@ const SuperAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [restaurantes, setRestaurantes] = useState<RestauranteStats[]>([]);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [selectedRestauranteId, setSelectedRestauranteId] = useState<string | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [estadoFilter, setEstadoFilter] = useState("todos");
+  const [planFilter, setPlanFilter] = useState("todos");
 
   useEffect(() => {
     checkSuperAdmin();
@@ -106,17 +115,65 @@ const SuperAdmin = () => {
     }
   };
 
+  // Filtered restaurants
+  const filteredRestaurantes = useMemo(() => {
+    return restaurantes.filter((restaurante) => {
+      const matchesSearch =
+        searchTerm === "" ||
+        restaurante.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        restaurante.correo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        restaurante.ruc?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesEstado =
+        estadoFilter === "todos" || restaurante.estado_suscripcion === estadoFilter;
+
+      const matchesPlan =
+        planFilter === "todos" || restaurante.plan_actual === planFilter;
+
+      return matchesSearch && matchesEstado && matchesPlan;
+    });
+  }, [restaurantes, searchTerm, estadoFilter, planFilter]);
+
   const getEstadoBadge = (estado?: string) => {
     switch (estado) {
       case "activa":
-        return <Badge variant="default" className="bg-green-500">Activa</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600">Activa</Badge>;
       case "pendiente":
         return <Badge variant="secondary">Pendiente</Badge>;
       case "cancelada":
         return <Badge variant="destructive">Cancelada</Badge>;
+      case "suspendida":
+        return <Badge variant="outline" className="border-orange-500 text-orange-500">Suspendida</Badge>;
       default:
         return <Badge variant="outline">Sin suscripción</Badge>;
     }
+  };
+
+  const handleViewDetails = (restauranteId: string) => {
+    setSelectedRestauranteId(restauranteId);
+    setIsDetailDialogOpen(true);
+  };
+
+  const handleExportData = () => {
+    try {
+      const dataStr = JSON.stringify(filteredRestaurantes, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `restaurantes_${new Date().toISOString().split("T")[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("Datos exportados correctamente");
+    } catch (error) {
+      toast.error("Error al exportar los datos");
+    }
+  };
+
+  const resetFilters = () => {
+    setSearchTerm("");
+    setEstadoFilter("todos");
+    setPlanFilter("todos");
   };
 
   if (!isSuperAdmin) {
@@ -182,22 +239,69 @@ const SuperAdmin = () => {
           </Card>
         </div>
 
+        {/* Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Filtros de Búsqueda</CardTitle>
+            <CardDescription>
+              Filtra y busca restaurantes por diferentes criterios
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SuperAdminFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              estadoFilter={estadoFilter}
+              setEstadoFilter={setEstadoFilter}
+              planFilter={planFilter}
+              setPlanFilter={setPlanFilter}
+              onReset={resetFilters}
+            />
+          </CardContent>
+        </Card>
+
         {/* Restaurants Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Restaurantes Registrados</CardTitle>
-            <CardDescription>
-              Lista completa de todos los restaurantes en la plataforma
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Restaurantes Registrados</CardTitle>
+                <CardDescription>
+                  {filteredRestaurantes.length} de {restaurantes.length} restaurantes
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={fetchRestaurantes}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+                  Actualizar
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportData}
+                  disabled={filteredRestaurantes.length === 0}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Exportar
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">
                 Cargando restaurantes...
               </div>
-            ) : restaurantes.length === 0 ? (
+            ) : filteredRestaurantes.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                No hay restaurantes registrados
+                {restaurantes.length === 0
+                  ? "No hay restaurantes registrados"
+                  : "No se encontraron restaurantes con los filtros aplicados"}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -210,14 +314,14 @@ const SuperAdmin = () => {
                       <TableHead>Teléfono</TableHead>
                       <TableHead>Plan</TableHead>
                       <TableHead>Estado</TableHead>
-                      <TableHead>Clientes</TableHead>
-                      <TableHead>Conversiones</TableHead>
-                      <TableHead>Premios</TableHead>
-                      <TableHead>Acciones</TableHead>
+                      <TableHead className="text-center">Clientes</TableHead>
+                      <TableHead className="text-center">Conversiones</TableHead>
+                      <TableHead className="text-center">Premios</TableHead>
+                      <TableHead className="text-center">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {restaurantes.map((restaurante) => (
+                    {filteredRestaurantes.map((restaurante) => (
                       <TableRow key={restaurante.id}>
                         <TableCell className="font-medium">{restaurante.nombre}</TableCell>
                         <TableCell>{restaurante.correo || "-"}</TableCell>
@@ -225,7 +329,9 @@ const SuperAdmin = () => {
                         <TableCell>{restaurante.telefono || "-"}</TableCell>
                         <TableCell>
                           {restaurante.plan_actual ? (
-                            <Badge variant="outline">{restaurante.plan_actual}</Badge>
+                            <Badge variant="outline" className="capitalize">
+                              {restaurante.plan_actual}
+                            </Badge>
                           ) : (
                             "-"
                           )}
@@ -234,14 +340,11 @@ const SuperAdmin = () => {
                         <TableCell className="text-center">{restaurante.total_clientes}</TableCell>
                         <TableCell className="text-center">{restaurante.total_conversiones}</TableCell>
                         <TableCell className="text-center">{restaurante.total_premios}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {
-                              // TODO: Implement view details functionality
-                              toast.info("Vista de detalles próximamente");
-                            }}
+                            onClick={() => handleViewDetails(restaurante.id)}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -255,6 +358,16 @@ const SuperAdmin = () => {
           </CardContent>
         </Card>
       </div>
+
+      <RestauranteDetailDialog
+        restauranteId={selectedRestauranteId}
+        isOpen={isDetailDialogOpen}
+        onClose={() => {
+          setIsDetailDialogOpen(false);
+          setSelectedRestauranteId(null);
+        }}
+        onUpdate={fetchRestaurantes}
+      />
     </DashboardLayout>
   );
 };
