@@ -1,13 +1,22 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { LogIn, UserPlus, Utensils } from "lucide-react";
+import { LogIn, UserPlus, Utensils, Shield } from "lucide-react";
 
 const Access = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4 relative">
+      <Button 
+        variant="ghost" 
+        className="absolute top-4 right-4 gap-2"
+        onClick={() => navigate("/login")}
+      >
+        <Shield className="w-4 h-4" />
+        Portal SuperAdmin
+      </Button>
+      
       <div className="w-full max-w-4xl space-y-8">
         <div className="text-center space-y-4">
           <div className="flex justify-center mb-4">
