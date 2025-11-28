@@ -12,6 +12,11 @@ interface Restaurante {
   direccion?: string;
 }
 
+interface UserRole {
+  role: string;
+  restaurante_id: string;
+}
+
 interface Usuario {
   id: string;
   nombre: string;
@@ -25,6 +30,7 @@ interface AuthContextType {
   session: Session | null;
   restaurante: Restaurante | null;
   usuario: Usuario | null;
+  userRole: UserRole | null;
   loading: boolean;
   signOut: () => Promise<void>;
   setRestaurante: (restaurante: Restaurante | null) => void;
@@ -38,12 +44,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [restaurante, setRestaurante] = useState<Restaurante | null>(null);
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Fetch restaurante data when user is authenticated
   const fetchRestauranteData = async (userId: string) => {
     try {
-      // Get user's restaurante_id from user_roles
+      // Get user's restaurante_id and role from user_roles
       const { data: roleData, error: roleError } = await supabase
         .from("user_roles")
         .select("restaurante_id, role")
@@ -52,6 +59,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (roleError || !roleData) {
         console.error("Error fetching user role:", roleError);
+        return;
+      }
+
+      // Set user role
+      setUserRole({
+        role: roleData.role,
+        restaurante_id: roleData.restaurante_id,
+      });
+
+      // If user is superadmin, skip restaurant fetch
+      if (roleData.role === "superadmin") {
         return;
       }
 
@@ -92,6 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!session) {
         setRestaurante(null);
         setUsuario(null);
+        setUserRole(null);
       } else if (session.user) {
         setTimeout(() => {
           fetchRestauranteData(session.user!.id);
@@ -122,6 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setRestaurante(null);
     setUsuario(null);
+    setUserRole(null);
   };
 
   return (
@@ -131,6 +151,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         session,
         restaurante,
         usuario,
+        userRole,
         loading,
         signOut,
         setRestaurante,
