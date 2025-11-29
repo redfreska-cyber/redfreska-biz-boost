@@ -56,9 +56,11 @@ const SuperAdminSignup = () => {
       if (authError) throw authError;
 
       if (authData.user) {
-        toast.success("Cuenta creada exitosamente");
-        toast.info("Debes asignar el rol de superadmin manualmente en la base de datos");
-        navigate("/login");
+        toast.success("¡Cuenta creada! Revisa tu correo para confirmarla.");
+        toast.info("Después de confirmar tu email, asigna el rol de superadmin en la base de datos");
+        setTimeout(() => {
+          navigate("/login");
+        }, 3000);
       }
     } catch (error: any) {
       console.error("Error en el registro:", error);
