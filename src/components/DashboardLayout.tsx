@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Sidebar from "./Sidebar";
 import SuperAdminSidebar from "./SuperAdminSidebar";
@@ -14,6 +14,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, restaurante, userRole, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isSuperAdmin = userRole?.role === "superadmin";
 
   useEffect(() => {
@@ -21,6 +22,27 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       navigate("/login");
     }
   }, [user, loading, navigate]);
+
+  // Redirect SuperAdmin away from regular restaurant routes
+  useEffect(() => {
+    if (!loading && isSuperAdmin) {
+      const restrictedRoutes = [
+        "/app/dashboard",
+        "/app/clientes",
+        "/app/referidos",
+        "/app/conversiones",
+        "/app/premios",
+        "/app/validaciones",
+        "/app/usuarios",
+        "/app/configuracion"
+      ];
+      
+      if (restrictedRoutes.includes(location.pathname)) {
+        navigate("/app/superadmin/dashboard");
+        toast.info("Redirigido al panel de SuperAdmin");
+      }
+    }
+  }, [isSuperAdmin, location.pathname, loading, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
