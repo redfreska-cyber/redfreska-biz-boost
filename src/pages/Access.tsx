@@ -11,7 +11,7 @@ const Access = () => {
       <Button 
         variant="ghost" 
         className="absolute top-4 right-4 gap-2"
-        onClick={() => navigate("/login")}
+        onClick={() => navigate("/superadmin/signup")}
       >
         <Shield className="w-4 h-4" />
         Portal SuperAdmin
