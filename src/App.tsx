@@ -10,6 +10,7 @@ import Welcome from "./pages/Welcome";
 import Access from "./pages/Access";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import ResetPassword from "./pages/ResetPassword";
 import Registro from "./pages/Registro";
 import SuperAdminSignup from "./pages/superadmin/SuperAdminSignup";
 import Dashboard from "./pages/app/Dashboard";
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/access" element={<Access />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/registro/:slug" element={<Registro />} />
           <Route path="/superadmin/signup" element={<SuperAdminSignup />} />
             
