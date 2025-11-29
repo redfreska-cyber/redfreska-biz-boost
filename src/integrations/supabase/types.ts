@@ -123,6 +123,39 @@ export type Database = {
           },
         ]
       }
+      planes: {
+        Row: {
+          caracteristicas: Json | null
+          created_at: string
+          descripcion: string | null
+          id: string
+          is_active: boolean
+          moneda: string
+          nombre: string
+          precio_mensual: number
+        }
+        Insert: {
+          caracteristicas?: Json | null
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          is_active?: boolean
+          moneda?: string
+          nombre: string
+          precio_mensual: number
+        }
+        Update: {
+          caracteristicas?: Json | null
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          is_active?: boolean
+          moneda?: string
+          nombre?: string
+          precio_mensual?: number
+        }
+        Relationships: []
+      }
       premios: {
         Row: {
           created_at: string
@@ -324,21 +357,21 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          restaurante_id: string
+          restaurante_id: string | null
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           created_at?: string | null
           id?: string
-          restaurante_id: string
+          restaurante_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           created_at?: string | null
           id?: string
-          restaurante_id?: string
+          restaurante_id?: string | null
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
@@ -360,6 +393,7 @@ export type Database = {
           id: string
           nombre: string
           restaurante_id: string
+          rol: string | null
           telefono: string | null
         }
         Insert: {
@@ -369,6 +403,7 @@ export type Database = {
           id?: string
           nombre: string
           restaurante_id: string
+          rol?: string | null
           telefono?: string | null
         }
         Update: {
@@ -378,11 +413,53 @@ export type Database = {
           id?: string
           nombre?: string
           restaurante_id?: string
+          rol?: string | null
           telefono?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "usuarios_restaurante_id_fkey"
+            columns: ["restaurante_id"]
+            isOneToOne: false
+            referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios_generales: {
+        Row: {
+          contrasena: string
+          correo: string
+          created_at: string | null
+          estado: string | null
+          id: string
+          nombre: string
+          restaurante_id: string | null
+          rol: string | null
+        }
+        Insert: {
+          contrasena: string
+          correo: string
+          created_at?: string | null
+          estado?: string | null
+          id?: string
+          nombre: string
+          restaurante_id?: string | null
+          rol?: string | null
+        }
+        Update: {
+          contrasena?: string
+          correo?: string
+          created_at?: string | null
+          estado?: string | null
+          id?: string
+          nombre?: string
+          restaurante_id?: string | null
+          rol?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuarios_generales_restaurante_id_fkey"
             columns: ["restaurante_id"]
             isOneToOne: false
             referencedRelation: "restaurantes"
