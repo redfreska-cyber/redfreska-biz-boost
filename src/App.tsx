@@ -22,6 +22,7 @@ import Validaciones from "./pages/app/Validaciones";
 import Usuarios from "./pages/app/Usuarios";
 import Configuracion from "./pages/app/Configuracion";
 import SuperAdmin from "./pages/app/SuperAdmin";
+import SuperAdminDashboard from "./pages/app/superadmin/Dashboard";
 import SuperAdminRestaurantes from "./pages/app/superadmin/Restaurantes";
 import NotFound from "./pages/NotFound";
 
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/app/usuarios" element={<DashboardLayout><Usuarios /></DashboardLayout>} />
             <Route path="/app/configuracion" element={<DashboardLayout><Configuracion /></DashboardLayout>} />
             <Route path="/app/superadmin" element={<DashboardLayout><SuperAdmin /></DashboardLayout>} />
+            <Route path="/app/superadmin/dashboard" element={<DashboardLayout><SuperAdminDashboard /></DashboardLayout>} />
             <Route path="/app/superadmin/restaurantes" element={<DashboardLayout><SuperAdminRestaurantes /></DashboardLayout>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

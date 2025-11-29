@@ -32,8 +32,8 @@ const SuperAdmin = () => {
         return;
       }
 
-      // Redirect to restaurantes page
-      navigate("/app/superadmin/restaurantes");
+      // Redirect to dashboard page
+      navigate("/app/superadmin/dashboard");
     } catch (error) {
       console.error("Error checking superadmin:", error);
       navigate("/app/dashboard");

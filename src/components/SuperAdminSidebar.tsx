@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import redFreskaLogo from "@/assets/redfreska-logo.png";
 
 const superAdminMenuItems = [
-  { title: "Dashboard", icon: LayoutDashboard, url: "/app/superadmin" },
+  { title: "Dashboard", icon: LayoutDashboard, url: "/app/superadmin/dashboard" },
   { title: "Restaurantes", icon: Store, url: "/app/superadmin/restaurantes" },
 ];
 
