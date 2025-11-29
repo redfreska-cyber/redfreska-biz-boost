@@ -26,15 +26,28 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: formData.correo,
         password: formData.password,
       });
 
       if (authError) throw authError;
 
+      // Check if user is superadmin
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", authData.user.id)
+        .single();
+
       toast.success("¡Bienvenido!");
-      navigate("/app/dashboard");
+      
+      // Redirect based on role
+      if (roleData?.role === "superadmin") {
+        navigate("/app/superadmin");
+      } else {
+        navigate("/app/dashboard");
+      }
     } catch (error: any) {
       console.error("Login error:", error);
       toast.error(error.message || "Error al iniciar sesión");
