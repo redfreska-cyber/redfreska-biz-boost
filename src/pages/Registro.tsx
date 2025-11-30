@@ -19,6 +19,7 @@ const Registro = () => {
   const [registroExitoso, setRegistroExitoso] = useState(false);
   const [codigoReferido, setCodigoReferido] = useState("");
   const [premios, setPremios] = useState<any[]>([]);
+  const [premioSeleccionado, setPremioSeleccionado] = useState<any>(null);
   const [restauranteId, setRestauranteId] = useState<string | null>(null);
   const [restauranteNoEncontrado, setRestauranteNoEncontrado] = useState(false);
   const [formData, setFormData] = useState({
@@ -123,6 +124,8 @@ const Registro = () => {
 
       // Success
       setCodigoReferido(data.cliente.codigo_referido);
+      const premio = premios.find(p => p.id === formData.premio_id);
+      setPremioSeleccionado(premio);
       setRegistroExitoso(true);
       
       toast({
@@ -195,23 +198,72 @@ const Registro = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-green-50 dark:bg-green-900/20 p-8 rounded-xl text-center border border-green-100 dark:border-green-900/40">
-              <p className="text-sm text-muted-foreground mb-3">Tu código de referido:</p>
-              <p className="text-4xl font-bold text-green-600 dark:text-green-500 tracking-wider">{codigoReferido}</p>
+            {/* Premio Seleccionado */}
+            {premioSeleccionado && (
+              <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border border-green-200 dark:border-green-900/40">
+                <p className="text-green-700 dark:text-green-400 font-semibold mb-4 text-center">
+                  🎁 ¡Has elegido un premio increíble!
+                </p>
+                
+                {premioSeleccionado.imagen_url && (
+                  <div className="mb-4 rounded-lg overflow-hidden">
+                    <img 
+                      src={premioSeleccionado.imagen_url} 
+                      alt={premioSeleccionado.descripcion}
+                      className="w-full h-48 object-cover"
+                    />
+                  </div>
+                )}
+                
+                <p className="text-center font-medium text-foreground mb-4">
+                  {premioSeleccionado.descripcion}
+                </p>
+                
+                <div className="bg-white dark:bg-gray-800 p-4 rounded-lg space-y-2 text-sm">
+                  <p className="flex items-center gap-2">
+                    <span>👥</span>
+                    <span><strong>Referidos necesarios:</strong> {premioSeleccionado.umbral} personas</span>
+                  </p>
+                  {premioSeleccionado.monto_minimo_consumo && (
+                    <p className="flex items-center gap-2">
+                      <span>💰</span>
+                      <span><strong>Monto mínimo por consumo:</strong> S/ {parseFloat(premioSeleccionado.monto_minimo_consumo).toFixed(2)}</span>
+                    </p>
+                  )}
+                </div>
+                
+                <p className="text-green-700 dark:text-green-400 font-semibold mt-4 text-center">
+                  ✨ ¡Estás a solo {premioSeleccionado.umbral} referidos de alcanzar tu premio!
+                </p>
+                
+                <p className="text-sm text-muted-foreground mt-3 text-center">
+                  Comparte tu código con amigos y familiares. Cada vez que consuman en nuestro restaurante, ¡estarás más cerca de tu objetivo!
+                </p>
+              </div>
+            )}
+            
+            {/* Código de Referido */}
+            <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-xl text-center border border-gray-200 dark:border-gray-800">
+              <p className="text-sm text-muted-foreground mb-3">Tu código de referido es:</p>
+              <p className="text-4xl font-bold text-foreground tracking-wider mb-4">{codigoReferido}</p>
             </div>
             
-            <div className="space-y-3 text-muted-foreground">
-              <p className="flex items-start gap-2">
-                <span className="text-green-600 dark:text-green-500 mt-0.5">•</span>
-                <span>Te hemos enviado tu código por correo electrónico</span>
+            {/* CTA Compartir */}
+            <div className="bg-orange-50 dark:bg-orange-900/20 p-5 rounded-xl border-l-4 border-orange-500">
+              <p className="font-bold text-orange-700 dark:text-orange-400 mb-3 flex items-center gap-2">
+                <span>💪</span>
+                <span>¡Comparte y gana!</span>
               </p>
-              <p className="flex items-start gap-2">
-                <span className="text-green-600 dark:text-green-500 mt-0.5">•</span>
-                <span>Comparte tu código con amigos y familiares</span>
+              <p className="text-sm text-muted-foreground mb-2">
+                Cada vez que un amigo use tu código de referido y consuma en nuestro restaurante, <strong>¡estarás más cerca de ganar increíbles premios!</strong>
               </p>
-              <p className="flex items-start gap-2">
-                <span className="text-green-600 dark:text-green-500 mt-0.5">•</span>
-                <span>Gana premios cuando tus referidos consuman</span>
+              <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                <li>• Comparte tu código con amigos y familiares</li>
+                <li>• Ellos disfrutan en nuestro restaurante</li>
+                <li>• Tú acumulas conversiones y ganas premios</li>
+              </ul>
+              <p className="text-sm font-medium text-orange-700 dark:text-orange-400 mt-3">
+                ¿Qué esperas? Entre más compartas, más rápido alcanzarás tus premios.
               </p>
             </div>
 
