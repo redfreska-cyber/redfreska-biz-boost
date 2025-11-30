@@ -182,37 +182,47 @@ const Registro = () => {
   if (registroExitoso) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
-        <Card className="w-full max-w-md">
+        <Card className="w-full max-w-md" id="registro-exitoso-card">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <CheckCircle2 className="w-16 h-16 text-primary" />
+              <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-500" strokeWidth={2.5} />
+              </div>
             </div>
-            <CardTitle className="text-2xl">¡Registro Exitoso!</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-3xl font-bold">¡Registro Exitoso!</CardTitle>
+            <CardDescription className="text-base mt-2">
               Bienvenido al programa de fidelización
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="bg-primary/10 p-6 rounded-lg text-center">
-              <p className="text-sm text-muted-foreground mb-2">Tu código de referido:</p>
-              <p className="text-2xl font-bold text-primary">{codigoReferido}</p>
+            <div className="bg-green-50 dark:bg-green-900/20 p-8 rounded-xl text-center border border-green-100 dark:border-green-900/40">
+              <p className="text-sm text-muted-foreground mb-3">Tu código de referido:</p>
+              <p className="text-4xl font-bold text-green-600 dark:text-green-500 tracking-wider">{codigoReferido}</p>
             </div>
             
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                • Te hemos enviado tu código por correo electrónico
+            <div className="space-y-3 text-muted-foreground">
+              <p className="flex items-start gap-2">
+                <span className="text-green-600 dark:text-green-500 mt-0.5">•</span>
+                <span>Te hemos enviado tu código por correo electrónico</span>
               </p>
-              <p className="text-sm text-muted-foreground">
-                • Comparte tu código con amigos y familiares
+              <p className="flex items-start gap-2">
+                <span className="text-green-600 dark:text-green-500 mt-0.5">•</span>
+                <span>Comparte tu código con amigos y familiares</span>
               </p>
-              <p className="text-sm text-muted-foreground">
-                • Gana premios cuando tus referidos consuman
+              <p className="flex items-start gap-2">
+                <span className="text-green-600 dark:text-green-500 mt-0.5">•</span>
+                <span>Gana premios cuando tus referidos consuman</span>
               </p>
+            </div>
+
+            <div className="bg-muted/50 p-4 rounded-lg text-center text-sm text-muted-foreground">
+              <p>📧 Recibirás esta misma información por correo electrónico.</p>
+              <p className="mt-1">💡 Puedes tomar captura de pantalla para guardar tu código.</p>
             </div>
 
             <Button 
               onClick={() => navigate('/')} 
-              className="w-full"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-base font-medium"
             >
               Cerrar
             </Button>
