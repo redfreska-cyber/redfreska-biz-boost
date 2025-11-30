@@ -353,6 +353,59 @@ export type Database = {
           },
         ]
       }
+      system_logs: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          ip_address: string | null
+          log_type: Database["public"]["Enums"]["log_type"]
+          metadata: Json | null
+          restaurante_id: string | null
+          severity: string | null
+          title: string
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: string | null
+          log_type: Database["public"]["Enums"]["log_type"]
+          metadata?: Json | null
+          restaurante_id?: string | null
+          severity?: string | null
+          title: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          ip_address?: string | null
+          log_type?: Database["public"]["Enums"]["log_type"]
+          metadata?: Json | null
+          restaurante_id?: string | null
+          severity?: string | null
+          title?: string
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_logs_restaurante_id_fkey"
+            columns: ["restaurante_id"]
+            isOneToOne: false
+            referencedRelation: "restaurantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -517,6 +570,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_system_log: {
+        Args: {
+          p_description?: string
+          p_ip_address?: string
+          p_log_type: Database["public"]["Enums"]["log_type"]
+          p_metadata?: Json
+          p_restaurante_id?: string
+          p_severity?: string
+          p_title: string
+          p_user_agent?: string
+          p_user_email?: string
+          p_user_id?: string
+        }
+        Returns: string
+      }
       get_user_restaurante_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -528,6 +596,30 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "empleado" | "superadmin"
+      log_type:
+        | "auth_login"
+        | "auth_logout"
+        | "auth_failed"
+        | "restaurant_created"
+        | "restaurant_updated"
+        | "restaurant_suspended"
+        | "restaurant_reactivated"
+        | "user_created"
+        | "user_updated"
+        | "user_role_changed"
+        | "user_deleted"
+        | "subscription_created"
+        | "subscription_updated"
+        | "subscription_cancelled"
+        | "payment_received"
+        | "payment_failed"
+        | "plan_created"
+        | "plan_updated"
+        | "config_updated"
+        | "report_generated"
+        | "data_exported"
+        | "system_maintenance"
+        | "security_alert"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -656,6 +748,31 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "empleado", "superadmin"],
+      log_type: [
+        "auth_login",
+        "auth_logout",
+        "auth_failed",
+        "restaurant_created",
+        "restaurant_updated",
+        "restaurant_suspended",
+        "restaurant_reactivated",
+        "user_created",
+        "user_updated",
+        "user_role_changed",
+        "user_deleted",
+        "subscription_created",
+        "subscription_updated",
+        "subscription_cancelled",
+        "payment_received",
+        "payment_failed",
+        "plan_created",
+        "plan_updated",
+        "config_updated",
+        "report_generated",
+        "data_exported",
+        "system_maintenance",
+        "security_alert",
+      ],
     },
   },
 } as const
