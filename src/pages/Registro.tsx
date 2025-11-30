@@ -306,8 +306,26 @@ const Registro = () => {
                   {premios.length > 0 ? (
                     premios.map((premio) => (
                       <SelectItem key={premio.id} value={premio.id}>
-                        {premio.descripcion} - {premio.umbral} referidos
-                        {premio.monto_minimo_consumo && ` (Min: S/ ${parseFloat(premio.monto_minimo_consumo).toFixed(2)})`}
+                        <div className="flex items-center gap-3">
+                          {premio.imagen_url ? (
+                            <img 
+                              src={premio.imagen_url} 
+                              alt={premio.descripcion}
+                              className="w-10 h-10 object-cover rounded"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 bg-muted rounded flex items-center justify-center text-muted-foreground text-xs">
+                              Sin imagen
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <div className="font-medium">{premio.descripcion}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {premio.umbral} referidos
+                              {premio.monto_minimo_consumo && ` - Mín: S/ ${parseFloat(premio.monto_minimo_consumo).toFixed(2)}`}
+                            </div>
+                          </div>
+                        </div>
                       </SelectItem>
                     ))
                   ) : (
