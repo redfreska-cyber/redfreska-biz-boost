@@ -271,6 +271,7 @@ export type Database = {
           correo_contacto: string | null
           created_at: string
           direccion: string | null
+          dominio_base: string | null
           estado_suscripcion: string | null
           fecha_fin: string | null
           fecha_inicio: string | null
@@ -287,6 +288,7 @@ export type Database = {
           correo_contacto?: string | null
           created_at?: string
           direccion?: string | null
+          dominio_base?: string | null
           estado_suscripcion?: string | null
           fecha_fin?: string | null
           fecha_inicio?: string | null
@@ -303,6 +305,7 @@ export type Database = {
           correo_contacto?: string | null
           created_at?: string
           direccion?: string | null
+          dominio_base?: string | null
           estado_suscripcion?: string | null
           fecha_fin?: string | null
           fecha_inicio?: string | null
