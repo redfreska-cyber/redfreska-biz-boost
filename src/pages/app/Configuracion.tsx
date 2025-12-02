@@ -20,6 +20,7 @@ const Configuracion = () => {
     direccion: "",
     correo: "",
     slug: "",
+    dominio_base: "",
   });
 
   useEffect(() => {
@@ -31,12 +32,14 @@ const Configuracion = () => {
         direccion: restaurante.direccion || "",
         correo: restaurante.correo || "",
         slug: (restaurante as any).slug || "",
+        dominio_base: (restaurante as any).dominio_base || "",
       });
     }
   }, [restaurante]);
 
+  const baseUrl = formData.dominio_base || window.location.origin;
   const registrationUrl = formData.slug 
-    ? `${window.location.origin}/registro/${formData.slug}`
+    ? `${baseUrl}/registro/${formData.slug}`
     : "";
 
   const handleCopyUrl = () => {
@@ -85,6 +88,7 @@ const Configuracion = () => {
           telefono: formData.telefono,
           direccion: formData.direccion,
           slug: formData.slug || null,
+          dominio_base: formData.dominio_base || null,
         })
         .eq("id", restaurante?.id)
         .select()
@@ -191,27 +195,58 @@ const Configuracion = () => {
           <CardTitle>Portal de Registro Público</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="slug">
-              URL personalizada (slug)
-              <span className="text-xs text-muted-foreground ml-2">
-                Solo letras, números y guiones
-              </span>
-            </Label>
-            <Input
-              id="slug"
-              value={formData.slug}
-              onChange={(e) => {
-                const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
-                setFormData({ ...formData, slug: value });
-              }}
-              placeholder="mi-restaurante"
-            />
-            {formData.slug && (
-              <p className="text-xs text-muted-foreground">
-                Link de registro: {registrationUrl}
+          <div className="space-y-4">
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4 space-y-2">
+              <p className="text-sm font-medium text-yellow-600 dark:text-yellow-500">
+                ⚠️ Importante: Configuración de dominio
               </p>
-            )}
+              <p className="text-xs text-muted-foreground">
+                Para que el QR funcione correctamente, debes publicar tu proyecto y luego ingresar la URL publicada abajo.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dominio_base">
+                Dominio Publicado
+                <span className="text-xs text-muted-foreground ml-2">
+                  Ejemplo: https://mi-app.lovable.app
+                </span>
+              </Label>
+              <Input
+                id="dominio_base"
+                value={formData.dominio_base}
+                onChange={(e) =>
+                  setFormData({ ...formData, dominio_base: e.target.value.trim() })
+                }
+                placeholder="https://tu-proyecto.lovable.app"
+              />
+              <p className="text-xs text-muted-foreground">
+                Encuentra tu URL publicada haciendo clic en "Publish" (botón verde arriba a la derecha)
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="slug">
+                URL personalizada (slug)
+                <span className="text-xs text-muted-foreground ml-2">
+                  Solo letras, números y guiones
+                </span>
+              </Label>
+              <Input
+                id="slug"
+                value={formData.slug}
+                onChange={(e) => {
+                  const value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+                  setFormData({ ...formData, slug: value });
+                }}
+                placeholder="mi-restaurante"
+              />
+              {formData.slug && (
+                <p className="text-xs text-muted-foreground">
+                  Link de registro: {registrationUrl}
+                </p>
+              )}
+            </div>
           </div>
 
           {formData.slug && registrationUrl && (
